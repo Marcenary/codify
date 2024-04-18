@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}
+	<title>{{ response.title }}</title>
+{% endblock %}
+{% block content %}
+	<main class="hero is-info">
+		<div class="box my-5 py-4 mx-6 px-6">
+			<div class="columns">
+				<form action="/login" method="POST" class="column">
+					<label class="label">
+						<span class="is-size-5 has-text-black has-text-weight-normal my-3 mx-3">Логин</span>
+						<input type="text" name="login" class="input is-info is-size-6 my-3 mx-3" required>
+						{% with messages = get_flashed_messages() %}
+							{% if messages %}
+								{% for message in messages %}
+									<span class="is-size-5 has-text-danger has-text-weight-normal my-3 mx-3">{{ message }}</span>
+								{% endfor %}
+							{% endif %}
+						{% endwith %}
+					</label>
+					<label class="label is-hidden">
+						<span class="is-size-5 has-text-black has-text-weight-normal my-3 mx-3">Email</span>
+						<input type="text" name="email" class="input is-size-6 my-3 mx-3" required>
+					</label>
+					<label class="label">
+						<span class="is-size-5 has-text-black has-text-weight-normal my-3 mx-3">Пароль</span>
+						<input type="password" name="password" class="input is-size-6 my-3 mx-3" required>
+					</label>
+					<label class="label" id="reg">
+						<input type="checkbox" class="checkbox  is-size-6 my-3 mx-3">
+						<span class="has-text-black has-text-weight-normal my-3">Зарегистрироваться</span>
+					</label>
+					<label class="label"><!-- задать куки, сессия всегда при входе -->
+						<input type="checkbox" name="setcookies" class="checkbox  is-size-6 my-3 mx-3">
+						<span class="has-text-black has-text-weight-normal my-3">Запомнить</span>
+					</label>
+				</form>
+				<div class="column"></div>
+			</div>
+			<div class="columns mx-4 my-4">
+				<div class="column"></div>
+				<button id="submit" class="column button is-info mx-3">OK</button>
+				<div class="column"></div>
+				<div class="column"></div>
+			</div>
+		</div>
+
+		<script>
+			let form = $('form'), pass = $('input[name="password"]'), hide = $('label.is-hidden')
+
+			$('#reg').on('change', e => {
+				if (e.target.checked) {
+					form.attr('action', '/sign')
+					setTimeout(() => hide.attr('class', 'label'), 350)
+				}
+				else {
+					form.attr('action', '/login')
+					setTimeout(() => hide.attr('class', 'label is-hidden'), 350)
+				}
+			})
+			$('#submit').click(async e => {
+				form.submit() // e.preventDefault()
+			})
+		</script>
+	</main>
+{% endblock %}

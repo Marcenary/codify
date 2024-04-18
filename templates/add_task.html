@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	<title>{{ response.title }}</title>
+{% endblock %}
+{% block content %}
+	<div class="hero is-info">
+		<div class="box mx-6 px-6">
+			<form action="http://127.0.0.1:5000/tasks/add" method="post" id="form">
+				<label class="label">
+					<div class="columns py-2">
+						<span class="column is-one-quarter is-size-5">Имя задания</span>
+						<input name="name" tabindex="1" id="name" type="text" class="input my-2" pattern="^([А-Яа-я0-9]|\w|\s){10,50}.$" placeholder="Маска кредитной карты..." required="true">
+					</div>
+				</label>
+				<label class="label">
+					<div class="columns py-2">
+						<input name="in" tabindex="2" id="in" type="text" class="input my-2" pattern="^(\w|\s|,)+$" placeholder="Входящие1,Входящие2,..." required>
+						<span class="column is-one-quarter is-size-5">Входные данные</span>
+					</div>
+				</label>
+				<label class="label">
+					<div class="columns py-2">
+						<input name="out" tabindex="3" id="out" type="text" class="input my-2" pattern="^(\w|\s|,|#|{|})+$" placeholder="верныйОтвет1,верныйОтвет2,..." required>
+						<span class="column is-one-quarter is-size-5">Выходные данные</span>
+					</div>
+				</label>
+				<label class="label py-2">
+					<span class="is-size-5">Описание задания</span>
+					<textarea  name="about" tabindex="4" id="about" class="textarea my-2" cols="10" rows="8" pattern="^([А-Яа-я0-9]|\s){25,1000}.$" placeholder="Обычно, когда вы что-то покупаете, вас спрашивают, верны ли номер вашей кредитной карты,..." required></textarea>
+				</label>
+				<button class="button is-info" type="submit">Добавить</button>
+			</form>
+		</div>
+	</div>
+	<script>
+		window.addEventListener("load", e => {
+			$('#name').val(localStorage.getItem("name"))
+			$('#in').val(localStorage.getItem("inp"))
+			$('#out').val(localStorage.getItem("out"))
+			$('#about').val(localStorage.getItem("about"))
+			console.log("Load data!")
+		})
+
+		setInterval(e => {
+			if (localStorage.getItem("name") != $('#name').val()) {
+				localStorage.setItem("name", $('#name').val())
+				localStorage.setItem("inp", $('#in').val())
+				localStorage.setItem("out", $('#out').val())
+				localStorage.setItem("about", $('#about').val())
+				console.log("Data save!")
+			}
+		}, 2000)
+	</script>
+{% endblock %}

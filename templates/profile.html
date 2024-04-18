@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}
+	<title>{{ response.title }}</title>
+{% endblock %}
+{% block content %}
+	<main class="hero is-info px-6">
+		<div class="tile is-ancestor">
+			<div class="tile is-3 is-vertical is-parent notification my-3 mx-3">
+				<div class="tile is-child notification is-info has-text-right">
+					<span>Имя: {{ response.user.name }}</span>
+				</div>
+				<div class="tile is-child notification is-link has-text-right">
+					<span>Почта: {{ response.user.email }}</span>
+				</div>
+				<div class="tile is-child notification is-primary has-text-right">
+					<span>Дата регистрации: {{ response.user.date.strftime('%Y-%b-%d') }}</span><!-- %H:%M:%S -->
+				</div>
+			</div>
+			<div class="tile is-3 is-vertical is-parent notification my-3 mx-3">
+				<div class="tile is-child notification is-warning is-bordered">
+					<span>Уровень: {{ response.user.lvl }}</span>
+				</div>
+				<div class="tile is-child notification is-danger">
+					<span>Решено задач: {{ response.user.solved }}</span>
+				</div>
+				<div class="tile is-child notification is-success">
+					<span>Решенные задачи: {{ 'Не одной не пройдено' if response.user.tasks_id == '[]' else response.user.tasks_id }}</span>
+				</div>
+			</div>
+			<div class="tile is-vertical is-parent notification is-info is-light my-3 mx-3 is-justify-content-center">
+				<label for="userSearch" class="title is-size-5 has-text-centered has-text-link ml-3">Введите имя</label>
+				<form class="is-flex">
+					<input id="userSearch" class="input is-link mt-3 mx-3" required="(\d|\w|[А-Яа-яЁё]|^\s)*" placeholder="Или номер страницы пользователя">
+					<button class="button is-link mt-3 mx-3">Искать</button>
+					<script>
+						$(".button")[2].addEventListener("click", e => {
+							document.location.replace(`http://127.0.0.1:5000/profile/${ $('input').val() }`)
+							e.preventDefault()
+						})
+					</script>
+				</form>
+			</div>
+		</div>
+	</main>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}
+	<title>{{ response.title }}</title>
+{% endblock %}
+{% block content %}
+<main class="hero is-info">
+	<div class="hero-body">
+		<div class="box has-background-info-light">
+			<div class="columns">
+				<div class="column">
+					<p class="title is-size-5 has-text-right has-text-black">Инструкция</p>
+					<div class="container notification has-background-info-dark has-text-centered">
+						<div>
+							<p class="title is-size-4 has-text-left">{{ task.name }}</p>
+							<p class="subtitle has-text-left">
+								{% for i in task.task.split('\n') %}
+									{{ i }}<br>
+								{% endfor %}
+							</p>
+						</div>
+					</div>
+					<p class="title is-size-5 has-text-right has-text-black">Вывод</p>
+					<div class="container notification has-background-info-dark has-text-centered">
+						<div>
+							<p class="subtitle has-text-left iss-clipped" id="log"></p>
+						</div>
+					</div>
+				</div>
+
+				<div class="column is-flex is-flex-direction-column">
+					<div>
+						<div class="is-flex is-justify-content-space-between">
+							<p class="title is-size-5 has-text-left has-text-black">Решение</p>
+							<div class="select">
+								<select>
+									<option value="none"></option>
+									{% for i in task.lang %}
+										<option value="{{ i }}">{{ i }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+						<textarea class="textarea has-fixed-size" rows="10" id="code"></textarea>
+					</div>
+					<br>
+					<div>
+						<p class="title is-size-5 has-text-left has-text-black">Пример тестов</p>
+						<textarea class="textarea has-fixed-size" rows="8" readonly tabindex="-1" id="run"></textarea><!-- readonly -->
+					</div>
+					<br>
+					<div class="content is-flex is-justify-content-flex-end">
+						<button id="test" class="button is-info mx-1">Test</button>
+						<button id="submit" class="button is-info mx-1">Submit</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="{{ url_for('static', filename='js/indent.js') }}"></script>
+	<script type="module" src="{{ url_for('static', filename='js/script.js') }}"></script>
+</main>
+{% endblock %}

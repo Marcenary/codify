@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	<title>{{ response.title }}</title>
+	<style>
+		a { text-decoration: none; }
+	</style>
+{% endblock %}
+
+{% block content %}
+	<div class="hero is-info">
+		<div class="box my-5 py-4 mx-6"><!-- has-background-info-dark -->
+
+		</div>
+	</div>
+	<script>
+		window.addEventListener('load', () => {
+			const tile = document.querySelector(".box")
+
+			$('button').click(e => window.location.replace("http://127.0.0.1:5000/get/add_page"))
+	
+			function splitArray(array=[], size=3) {
+				// array массив, можно использовать массив объектов
+				// размер подмассива
+				let subarray = []; //массив в который будет выведен результат.
+				for (let i = 0; i <Math.ceil(array.length/size); i++)
+					subarray[i] = array.slice((i*size), (i*size) + size);
+				return subarray
+			}
+
+			const create_html = (el) => `
+				<div class="column">
+					<a href="http://127.0.0.1:5000/task/${ el.id }">
+						<article class="notification has-background-${['link', 'info', ][Math.floor(Math.random() * 2)]}${Math.floor(Math.random() * 2) == 1 ? '-dark': ''}">
+							<p class="title has-text-white is-size-5">${ el.name }</p>
+							<p class="subtitle has-text-white">${ el.task.slice(0, 101) }...</p>
+							<p class="has-text-white has-text-right">${ el.lang.join(", ") }</p>
+						</article>
+					</a>
+				</div>`
+
+			function push_html(tasks) {
+				tmp = splitArray(tasks), str = '', tile.innerHTML = ""
+				
+				for (let i = 0; i < tmp.length; ++i) {
+					str += `<div class="columns">`
+					for (el of tmp[i]) str += create_html(el)
+					str += `</div>`
+				}
+				tile.innerHTML = str
+			}
+
+	
+			fetch("http://127.0.0.1:5000/get/tasks", {
+				headers: { "Content-type": "application/json; charset=UTF-8" }
+			})
+			.then(res => res.json())
+			.then(json => push_html(json))
+		})
+	</script>
+{% endblock %}
