@@ -1,7 +1,17 @@
-from werkzeug.security import generate_password_hash, check_password_hash
+from app import app
+from db import db, Clients, Task, Template, User, Lite
 from flask import url_for, redirect, render_template, session, request, flash, make_response, abort, jsonify, json
-from db import app, db, Clients, Task, Template, User, Lite
-# 15 defs, 5 classes
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+@app.get("/test")
+def main():
+    tmp = Clients.query.all()
+    print(tmp)
+    tmp = Task.query.all()
+    print(tmp)
+    return "If you see this message, thats Work!"
 
 @app.route("/")
 def index():

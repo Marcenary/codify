@@ -1,3 +1,5 @@
+# TODO: Add whatever
+# FIXME: Should be
 from server import app
 
 if __name__ == "__main__":

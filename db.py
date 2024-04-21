@@ -1,15 +1,7 @@
-from flask import Flask
+from app import db
 from datetime import datetime
 from dataclasses import dataclass
-from flask_sqlalchemy import SQLAlchemy as SQL
 
-
-app = Flask(__name__)
-app.secret_key = b'192b9bdd22ab9ed4d12e236c78afcb9a393ec15f71bbf5dc987d54727823bcbf'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///TaskIfy.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQL(app)
 
 @dataclass
 class Lite:
@@ -36,7 +28,7 @@ class Template:
 	tasks: 	 list = None
 
 class Clients(db.Model):
-	__tablename__ = 'clients'
+	__tablename__ = 'Clients'
 	id       = db.Column(db.Integer, primary_key=True, unique=True)
 	name     = db.Column(db.Text, nullable=False)
 	email    = db.Column(db.Text, nullable=False)
@@ -50,11 +42,11 @@ class Clients(db.Model):
 		return f"<Clients { self.name }>"
 
 class Task(db.Model):
-	__tablename__ = 'task'
+	__tablename__ = 'Task'
 	id        = db.Column(db.Integer, primary_key=True, unique=True)
 	name      = db.Column(db.Text, nullable=False)
 	type      = db.Column(db.Integer, nullable=False)
-	creator   = db.Column(db.Integer, db.ForeignKey('clients.id'))
+	creator   = db.Column(db.Integer, db.ForeignKey('Clients.id'))
 	victorina = db.Column(db.Text, nullable=False, default='[]')
 	practic   = db.Column(db.Text, nullable=False, default='[]')
 	otvet     = db.Column(db.Text, nullable=False)
@@ -63,3 +55,4 @@ class Task(db.Model):
 
 	def __repr__(self):
 		return f"<Task { self.id }>"
+
