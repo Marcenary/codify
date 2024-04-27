@@ -6,6 +6,8 @@
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy as SQL
+from flask_admin import Admin
+from flask_admin.contrib import ModelView
 
 # Временно
 
@@ -17,10 +19,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///TaskIfy.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQL(app)
+admin = Admin(app)
 migrate = Migrate(app, db)
 
-if __name__ == "__main__":
+# not exsists in app.py
+# admin.add_wiew(ModelView(Clients, db.session))
+
+if __name__ == "__main__": # or def create_app()
     try:
-        db.init_app(app)
+        db.init_app(app) # if db = SQL()
+        admin.init_app(app) # if admin = Admin()
+        # without try\except
     except RuntimeError:
         pass
