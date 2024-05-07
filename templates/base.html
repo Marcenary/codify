@@ -25,28 +25,32 @@
 		      </div>
 		      <div id="navbarMenuHeroB" class="navbar-menu">
 		        <div class="navbar-end">
+				  {% if current_user.role == "admin" %}
+		          <a class="navbar-item" href="{{ url_for('admin.index') }}">
+		            Панель
+		          </a>
+				  {% endif %}
 		          <a class="navbar-item" href="{{ url_for('profile') }}">
 		            Главная
 		          </a>
-		          <!-- <a class="navbar-item" href="{ url_for('list_tasks') }}"> -->
-		          <a class="navbar-item" href="#">
+		          <a class="navbar-item" href="{{ url_for('tasks.list_tasks') }}">
 		            Задания
 		          </a>
 		          <a class="navbar-item" href="{{ url_for('forum.forum_n') }}">
 		            Помощь
 		          </a>
-            	  {% if nav_u.loged == True %}
+            	  {% if nav_u.loged == True or current_user.is_authenticated %}
             	  <span class="navbar-item">
             	    	<div class="button is-white is-outlined">
 	            	    	<span>{{ nav_u.name  }} lvl: {{ nav_u.lvl  }}</span>
             	    	</div>
             	  </span>
-            	  {% endif %}
 		          <span class="navbar-item">
-            	    <a class="button is-info is-inverted" href="/logout">
-            	      Выход
-            	    </a>
-            	  </span>
+					  <a class="button is-info is-inverted" href="/logout">
+						  Выход
+						</a>
+					</span>
+				  {% endif %}
             	  {% if response.title == "Задания" %}
             	  <span class="navbar-item">
             	    	<button class="button is-info is-inverted">

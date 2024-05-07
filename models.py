@@ -1,7 +1,9 @@
 # Модуль моделей данных
-from app import database as db, BaseView, expose
+from extensions import database as db
 from datetime import datetime
 from dataclasses import dataclass
+
+from flask_login import UserMixin
 
 
 @dataclass
@@ -28,28 +30,26 @@ class Template:
 	user:    User = None
 	tasks: 	 list = None
 
-class GoMain(BaseView):
-	@expose('/')
-	def main_page(self: BaseView):
-		return self.render("admin/main.html")
-
 #UserMixin, 
-class Clients(db.Model):
+class Clients(db.Model, UserMixin):
 	__tablename__ = "Clients"
 
 	id        = db.Column(db.Integer,  primary_key=True, unique=True)
 	name      = db.Column(db.Text,     nullable=False)
 	email     = db.Column(db.Text,     nullable=False)
-	password  = db.Column(db.Text,     nullable=False)
+	password  = db.Column(db.Text,     nullable=False, default="user")
 	role      = db.Column(db.Text,     index=True)
 	level     = db.Column(db.Integer,  default=1)
 	solved    = db.Column(db.Integer,  default=0)
 	tasks_id  = db.Column(db.Text,     default='[]')
 	date      = db.Column(db.DateTime, default=datetime.utcnow)
-	last_seen = db.Column(db.DateTime, default=datetime.utcnow) # TODO: Раскоментировать позже
+	last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 	status    = db.Column(db.Integer,  default=0)
 
 	def __repr__(self): return f"Clients: { self.name }"
+
+	def is_admin(self):
+		return self.role.lower() == "admin"
 
 class Task(db.Model):
 	__tablename__ = "Task"

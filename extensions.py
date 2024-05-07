@@ -12,4 +12,4 @@ metadata = MetaData(
 )
 
 database = SQLAlchemy(metadata=metadata)
-database = SQLAlchemy()
+# database = SQLAlchemy()
