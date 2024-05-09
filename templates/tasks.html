@@ -17,7 +17,7 @@
 		window.addEventListener('load', () => {
 			const tile = document.querySelector(".box")
 
-			$('button').click(e => window.location.replace("http://127.0.0.1:5000/get/add_page")) // FIXME: <-
+			$('button').click(e => window.location.replace(`${ location.origin }/get/add_page`)) // FIXME: <-
 	
 			function splitArray(array=[], size=3) {
 				// array массив, можно использовать массив объектов
@@ -30,7 +30,7 @@
 
 			const create_html = (el) => `
 				<div class="column">
-					<a href="http://127.0.0.1:5000/task/${ el.id }">
+					<a href="${ location.origin }/task/${ el.id }">
 						<article class="notification has-background-${['link', 'info', ][Math.floor(Math.random() * 2)]}${Math.floor(Math.random() * 2) == 1 ? '-dark': ''}">
 							<p class="title has-text-white is-size-5">${ el.name }</p>
 							<p class="subtitle has-text-white">${ el.task.slice(0, 101) }...</p>
@@ -51,7 +51,7 @@
 			}
 
 	
-			fetch("http://127.0.0.1:5000/get/tasks", {
+			fetch(`${ location.origin }/get/tasks`, {
 				headers: { "Content-type": "application/json; charset=UTF-8" }
 			})
 			.then(res => res.json())

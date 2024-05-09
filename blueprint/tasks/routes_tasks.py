@@ -1,5 +1,6 @@
 from flask import Blueprint
-from models import Clients, Task, Lengs, Template, Lite
+from flask_login import login_required
+from models import Clients, Task, Lengs, Template
 from flask import (
 	url_for, redirect,
 	render_template,
@@ -12,16 +13,14 @@ def tasks_routes(app, db):
 	tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks") # template_folder="templates"
 
 	@tasks_bp.get("/")
+	@login_required
 	def list_tasks():
 		'''Страница заданий'''
-		if 'username' in session:
-			lite = Lite(name=session['username'], lvl=session['lvl'], loged=session['loged'])
-		else: lite = None
-
 		response = Template(title='Задания', info='Задания', subinfo='Выберите задания')
-		return render_template('tasks.html', response=response, nav_u=lite) # tasks=tasks
+		return render_template('tasks.html', response=response) # tasks=tasks
 
 	@tasks_bp.post("/add")
+	@login_required
 	def add_task():
 		'''Страница добавления задания'''
 		try:
@@ -46,6 +45,7 @@ def tasks_routes(app, db):
 			return jsonify(status="error")
 
 	@tasks_bp.get("/task/<int:n>")
+	@login_required
 	def get_task(n: int):
 		'''Страница выполнения задания'''
 		name = session.get('username') or request.cookies.get('username')
@@ -53,15 +53,12 @@ def tasks_routes(app, db):
 			task = Task.query.filter_by(id=n).first()
 			task.lang = json.loads(task.lang)
 
-			if 'username' in session:
-				lite = Lite(name=session['username'], lvl=session['lvl'], loged=session['loged'])
-			else: lite = None
-
 			response = Template(title="Задание", info="", subinfo="")
-			return render_template('task.html', response=response, nav_u=lite, task=task)
+			return render_template('task.html', response=response, task=task)
 		return redirect(url_for('index'))
 
 	@tasks_bp.post("/task")
+	@login_required
 	def post_task():
 		'''Маршрут проверенного задания'''
 		try:
@@ -107,12 +104,8 @@ def tasks_routes(app, db):
 			return task
 			
 		if n == "add_page":
-			if 'username' in session:
-				lite = Lite(name=session['username'], lvl=session['lvl'], loged=session['loged'])
-			else: redirect(url_for('index'))
-
 			response = Template(title="Добавить задание", info="", subinfo="")
-			return render_template('add_task.html', response=response, nav_u=lite)
+			return render_template('add_task.html', response=response)
 
 	@tasks_bp.post("/compile")
 	def compile_task():

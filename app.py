@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_admin import Admin
 from flask_login import LoginManager
+from flask_restful import Api
+from flask_gravatar import Gravatar
 from flask_migrate import Migrate
 
 from routes_admin import regist_admin_panel
@@ -24,9 +26,11 @@ def create_app() -> None:
     db.init_app(app=app)
     admin = Admin(app=app, name="Codify", template_mode="bootstrap4")
     login = LoginManager(app=app)
+    api = Api(app=app)
+    avatar = Gravatar(app=app) # modified module flask_gravatar
     migrate = Migrate(app=app, db=db)
 
-    regist_routes(app=app, db=db, login=login)
+    regist_routes(app=app, db=db, login=login, api=api)
     regist_admin_panel(admin=admin, db=db)
 
     return app

@@ -1,13 +1,21 @@
 from flask import Blueprint
-# from .importes import * # заменить на конкретные элементы
+from models import Clients, Template, User
+from flask import (
+	# url_for, redirect,
+	render_template,
+	# session, request,
+	# flash, make_response,
+	# abort
+)
 
 def forum_routes(app, db):
     '''Инициализация маршрутов форума, использется Blueprint'''
-    forum_bp = Blueprint("forum", __name__, template_folder="templates", url_prefix="/forum")
+    forum_bp = Blueprint("forum", __name__, template_folder="blueprint/forum/templates", url_prefix="/forum")
 
     @forum_bp.route("/")
     def forum_n():
-        return f"You send nothing!"
+        response = Template(title='Форум', info="Форум", subinfo="Эта страница ещё в разработке")
+        return render_template('forum/index.html', response=response)
 
     @forum_bp.route("/<mess>")
     def forum(mess: str):

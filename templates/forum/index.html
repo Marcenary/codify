@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}
+	<title>{{ response.title }}</title>
+{% endblock %}
+{% block content %}
+<table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+	<thead>ЯП-1</thead><!-- Выводить категорию -->
+	<thead>
+		<tr class="is-dark is-selected">
+			<th></th>
+			<th>Имя темы</th>
+			<th>Ответов</th>
+			<th>Автор</th>
+			<th>ЯП</th><!-- Сделать категорией -->
+			<th>Последнее сообщение</th>
+		</tr>
+	</thead>
+	<tfoot>
+		<tr>
+			<th></th>
+			<th>Имя темы</th>
+			<th>Ответов</th>
+			<th>Автор</th>
+			<th>ЯП</th>
+			<th>Последнее сообщение</th>
+		</tr>
+	</tfoot>
+	<tbody>
+		<tr>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</tbody>
+</table>
+{% endblock %}

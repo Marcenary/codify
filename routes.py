@@ -1,11 +1,13 @@
+from route_api import api_routes
 from routes_users import users_routes
-from routes_tasks import tasks_routes
+from blueprint.tasks.routes_tasks import tasks_routes
 from blueprint.forum.routes_forum import forum_routes
 
-def regist_routes(app, db, login):
+def regist_routes(app, db, login, api):
     users_routes(app=app, db=db, login=login)
     tasks_bp = tasks_routes(app=app, db=db)
     forum_bp = forum_routes(app=app, db=db)
+    api_routes(api=api, db=db)
     
     app.register_blueprint(tasks_bp)
     app.register_blueprint(forum_bp)

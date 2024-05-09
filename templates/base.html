@@ -8,116 +8,99 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/bulma.min.css') }}">
 	<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
 </head>
-<body>
-	<section class="hero is-info is-small">
+<body id="dark_theme">
+	<section class="hero is-link is-dark is-small">
 		<div class="hero-head">
-		  <nav class="navbar">
-		    <div class="container">
-		      <div class="navbar-brand">
-		        <a class="navbar-item" href="{{ url_for('index') }}">
-		        	<h1 class="is-size-2 has-text-white has-text-weight-medium">Codify</h1>
-		        </a>
-		        <span class="navbar-burger" data-target="navbarMenuHeroB">
-		          <span></span>
-		          <span></span>
-		          <span></span>
-		        </span>
-		      </div>
-		      <div id="navbarMenuHeroB" class="navbar-menu">
-		        <div class="navbar-end">
-				  {% if current_user.role == "admin" %}
-		          <a class="navbar-item" href="{{ url_for('admin.index') }}">
-		            Панель
-		          </a>
-				  {% endif %}
-		          <a class="navbar-item" href="{{ url_for('profile') }}">
-		            Главная
-		          </a>
-		          <a class="navbar-item" href="{{ url_for('tasks.list_tasks') }}">
-		            Задания
-		          </a>
-		          <a class="navbar-item" href="{{ url_for('forum.forum_n') }}">
-		            Помощь
-		          </a>
-            	  {% if nav_u.loged == True or current_user.is_authenticated %}
-            	  <span class="navbar-item">
-            	    	<div class="button is-white is-outlined">
-	            	    	<span>{{ nav_u.name  }} lvl: {{ nav_u.lvl  }}</span>
-            	    	</div>
-            	  </span>
-		          <span class="navbar-item">
-					  <a class="button is-info is-inverted" href="/logout">
-						  Выход
-						</a>
-					</span>
-				  {% endif %}
-            	  {% if response.title == "Задания" %}
-            	  <span class="navbar-item">
-            	    	<button class="button is-info is-inverted">
-            	      		Create
-            	    	</button>
-            	  </span>
-            	  {% endif %}
-		        </div>
-		      </div>
-		    </div>
-		  </nav>
-		</div>
+		  	<nav class="navbar">
+		    	<div class="container">
+		    		<div class="navbar-brand">
+		    			<a class="navbar-item" href="{{ url_for('index') }}">
+		    				<h1 class="is-size-2 has-text-white has-text-weight-medium">Codify</h1>
+		    			</a>
+		    			<span class="navbar-burger" data-target="navbarMenuHeroB">
+		    				<span></span>
+		    				<span></span>
+		    				<span></span>
+		    			</span>
+		    		</div>
+			    	<div id="navbarMenuHeroB" class="navbar-menu">
+			        	<div class="navbar-end">
+							<a class="navbar-item" href="{{ url_for('profile') }}">Главная</a>
+			        		<a class="navbar-item" href="{{ url_for('tasks.list_tasks') }}">Задания</a>
+							{% if current_user.is_authenticated %}
+							<a class="navbar-item" href="{{ url_for('admin.index') }}">Панель</a>
+							{% endif %}
+			        		<a class="navbar-item" href="{{ url_for('forum.forum_n') }}">Помощь</a>
 
+							{% if current_user.is_authenticated %}
+							<span class="navbar-item">
+								<div class="button is-white is-outlined">
+									<span>{{ current_user.name  }} lvl: {{ current_user.level  }}</span>
+								</div>
+							</span>
+							<span class="navbar-item">
+								<a class="button is-info is-inverted" href="/logout">Выход</a>
+							</span>
+							{% endif %}
+							
+	            			{% if response.title == "Задания" %}
+	            			<span class="navbar-item">
+	            			  	<button class="button is-info is-inverted">Создать</button>
+	            			</span>
+	            			{% endif %}
+			        	</div>
+					</div>
+		    	</div>
+			</nav>
+		</div>
+	
 		<div class="hero-body">
-		  <div class="container has-text-centered">
-		    <p class="title">
-		      {{ response.info }}
-		    </p>
-		    <p class="subtitle">
-		      {{ response.subinfo }}
-		    </p>
-			<br>
-		  </div>
+			<div class="container has-text-centered">
+				<p class="title">{{ response.info }}</p>
+		    	<p class="subtitle">{{ response.subinfo or current_user.name }}</p>
+				<br>
+			</div>
 		</div>
 
 		<div class="hero-foot">
 		  <nav class="tabs is-boxed is-fullwidth">
 		    <div class="container">
-		      <ul>
-		        <li class="is-active"><!--  --></li>
-		        <li></li>
-		        <li></li>
-		        <li></li>
-		        <li></li>
-		        <li></li>
-		        <li></li>
-		        <li></li>
-		      </ul>
+		    	<ul>
+		    		<li class="is-active"><!--  --></li>
+		    		<li></li>
+		    		<li></li>
+		    		<li></li>
+		    		<li></li>
+		    		<li></li>
+		    		<li></li>
+		    		<li></li>
+		    	</ul>
 		    </div>
 		  </nav>
 		</div>
 	</section>
 	{% block content %}{% endblock %}
-	<footer class="hero is-info">
-		<div class="conteiner mt-6 mb-4 py-4 mx-6 px-6">
-			<div class="columns">
-				<div class="column">
-					<a href="{{ url_for('index') }}"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Главная</span></a><br>
-					<!-- <a href="{ url_for('routes_tasks.list_tasks') }}"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Задания</span></a><br> -->
-					<a href="#"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Задания</span></a><br>
-					<a href="{{ url_for('forum.forum', mess='Help') }}"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Помощь</span></a><br>
-					<a href="{{ url_for('about') }}"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">О сервисе</span></a><br>
+	<footer class="hero is-link is-dark py-6 px-6">
+		<div class="hero-head">
+			<nav class="navbar">
+				<div class="container ">
+					<div class="columns">
+						<div class="column is-6">
+							<a href="{{ url_for('index') }}"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Главная</span></a><br>
+							<a href="{{ url_for('tasks.list_tasks') }}"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Задания</span></a><br>
+							<a href="{{ url_for('forum.forum', mess='Help') }}"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Помощь</span></a><br>
+							<a href="{{ url_for('about') }}"><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">О сервисе</span></a><br>
+						</div>
+						<div class="column is-8">
+							<a><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Почта: resolve.it@gmail.com</span></a><br>
+							<a><span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Номер: +8 (919) 318-16-05</span></a><br>
+							<span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Все права защищены &copy</span>
+						</div>
+						<div class="column"></div>
+						<div class="column"></div>
+					</div>
 				</div>
-				<div class="column">
-					<a>
-						<span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Почта: resolve.it@gmail.com</span>
-					</a>
-					<br>
-					<a>
-						<span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Номер: +8 (919) 318-16-05</span>
-					</a>
-					<br>
-					<span class="is-size-6 has-text-white has-text-weight-normal my-4 mx-3">Все права защищены &copy</span>
-				</div>
-				<div class="column"></div>
-				<div class="column"></div>
-			</div>
+			</nav>
 		</div>
 	</footer>
 </body>

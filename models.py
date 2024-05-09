@@ -5,31 +5,6 @@ from dataclasses import dataclass
 
 from flask_login import UserMixin
 
-
-@dataclass
-class Lite:
-	name:  	  str
-	lvl: 	  int
-	loged:    bool
-
-@dataclass
-class User:
-	name:  	  str
-	email: 	  str
-	lvl: 	  int
-	solved:	  int
-	tasks_id: list
-	# loged:    bool # <- in futured on/off-line user now
-	date:     int
-
-@dataclass
-class Template:
-	title:   str  = None
-	info: 	 str  = None
-	subinfo: str  = None
-	user:    User = None
-	tasks: 	 list = None
-
 #UserMixin, 
 class Clients(db.Model, UserMixin):
 	__tablename__ = "Clients"
@@ -42,14 +17,25 @@ class Clients(db.Model, UserMixin):
 	level     = db.Column(db.Integer,  default=1)
 	solved    = db.Column(db.Integer,  default=0)
 	tasks_id  = db.Column(db.Text,     default='[]')
-	date      = db.Column(db.DateTime, default=datetime.utcnow)
-	last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+	date      = db.Column(db.DateTime, default=datetime.now)
+	last_seen = db.Column(db.DateTime, default=datetime.now)
 	status    = db.Column(db.Integer,  default=0)
 
-	def __repr__(self): return f"Clients: { self.name }"
+	def last_time(self):
+		self.last_seen = datetime.now()
 
-	def is_admin(self):
-		return self.role.lower() == "admin"
+	# @property
+	# def password(self):
+	# 	raise AttributeError('password is not a readable attribute')
+
+	# @password.setter
+	# def password(self, password):
+	# 	self.password_hash = generate_password_hash(password)
+
+	# def verify_password(self, password):
+	# 	return check_password_hash(self.password_hash, password)
+
+	def __repr__(self): return f"Clients: { self.name }"
 
 class Task(db.Model):
 	__tablename__ = "Task"
@@ -80,7 +66,13 @@ class Lengs(db.Model):
 # class Properties:
 # 	__tablename__ = "Properties"
 
-# 	id      = db.Column(db.Integer,  primary_key=True, unique=True)
+# 	id        = db.Column(db.Integer,  primary_key=True, unique=True)
+# 	theme     = db.Column(db.Integer)
+# 	new_name  = db.Column(db.Integer)
+# 	new_email = db.Column(db.Integer)
+# 	new_passw = db.Column(db.Integer)
+# 	deanon    = db.Column(db.Integer)
+# 	...
 # 	# TODO: Добавить все настройки позже - boolean(True-включиены, False-выключенны)
 # 	creator = db.Column(db.Integer, db.ForeignKey('Clients.id'))
 
@@ -88,24 +80,42 @@ class Lengs(db.Model):
 # 	__tablename__ = "Forum"
 
 # 	id      = db.Column(db.Integer,  primary_key=True, unique=True)
-# 	title   = db.Column(db.Text,     nullable=False)
-# 	message = db.Column(db.Text,     nullable=False)
-# 	date    = db.Column(db.DateTime, default=datetime.utcnow)
-	
+# 	name    = db.Column(db.Text,     nullable=False)
+# 	size_review = db.Column(db.Integer)
+# 	author      = db.Column(db.Integer, db.ForeignKey('Clients.id'), nullable=False) # INFO: Обязателен, тот кто создаёт
 # 	lang        = db.Column(db.Text,    db.ForeignKey('Lengs.id')) # INFO: ЯП вопроса
 # 	last_review = db.Column(db.Text,    db.ForeignKey('Thread.id'))
-# 	creator     = db.Column(db.Integer, db.ForeignKey('Clients.id'), nullable=False) # INFO: Обязателен, тот кто создаёт
 
-# 	def __repr__(self): return f"<Forum { self.id }>"
+# 	def __repr__(self): return f"Forum name: { self.id }"
 
 # class Thread(db.Model): # Related Reviews
 # 	__tablename__ = "Thread"
 
-# 	id      = db.Column(db.Integer,  primary_key=True, unique=True)
-# 	message = db.Column(db.Text,     nullable=False)
-# 	date    = db.Column(db.DateTime, default=datetime.utcnow)
+# 	id       = db.Column(db.Integer,  primary_key=True, unique=True)
+# 	name     = db.Column(db.Text,     nullable=False)
+# 	message  = db.Column(db.Text,     nullable=False)
+# 	photo    = db.Column(db.Text,     nullable=False)
+# 	remember = db.Column(db.Text,     nullable=False)
+# 	date     = db.Column(db.DateTime, default=datetime.now)
 	
 # 	forum_id = db.Column(db.Integer, db.ForeignKey('Forum.id')) # INFO: К какому Треду относится отзыв
-# 	creator  = db.Column(db.Integer, db.ForeignKey('Clients.id'))
+# 	author  = db.Column(db.Integer, db.ForeignKey('Clients.id'))
 
 # 	def __repr__(self): return f"<Thread { self.id }>"
+
+@dataclass
+class User:
+	name:  	  str
+	email: 	  str
+	lvl: 	  int
+	solved:	  int
+	tasks_id: list
+	date:     int
+
+@dataclass
+class Template:
+	title:   str  = None
+	info: 	 str  = None
+	subinfo: str  = None
+	user:    Clients = None
+	tasks: 	 list = None
