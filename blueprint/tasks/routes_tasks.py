@@ -82,7 +82,7 @@ def tasks_routes(app, db):
 			app.logger.info('Ошибка добавления в БД: %s' % e)
 			return jsonify(status="Попробуйте ещё раз позже!")
 
-	@tasks_bp.get("/get/<n>")
+	@tasks_bp.route("/get/<n>")
 	def api(n: str):
 		'''API маршруты для облегчения обращения и получения нужной информации'''
 		if n == "tasks":
@@ -94,6 +94,7 @@ def tasks_routes(app, db):
 					"task": task.task,
 					"lang": json.loads(task.lang),
 				})
+			print(len(res))
 			return json.dumps(res)
 
 		if n == "task":
@@ -106,6 +107,8 @@ def tasks_routes(app, db):
 		if n == "add_page":
 			response = Template(title="Добавить задание", info="", subinfo="")
 			return render_template('add_task.html', response=response)
+		
+		return "Uncorrect request!"
 
 	@tasks_bp.post("/compile")
 	def compile_task():

@@ -50,8 +50,7 @@
 				tile.innerHTML = str
 			}
 
-	
-			fetch(`${ location.origin }/get/tasks`, {
+			fetch(`${ location.origin }{{ url_for("tasks.api", n='tasks') }}`, {
 				headers: { "Content-type": "application/json; charset=UTF-8" }
 			})
 			.then(res => res.json())

@@ -16,4 +16,4 @@ def api_routes(api, db):
     '''Инициализация маршрутов API'''
     api.add_resource(TasksResource,   "/api/v1/get/tasks")
     api.add_resource(TaskResource,    "/api/v1/get/task/<int:id>")
-    api.add_resource(CompileResource, "/api/v1/compile/<string:lang>")
+    api.add_resource(CompileResource, "/api/v1/compile/<lang>")

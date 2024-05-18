@@ -1,5 +1,7 @@
-from werkzeug.security import generate_password_hash, check_password_hash
 from models import Clients, Template, User
+
+from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 
 from flask_login import login_user, logout_user, current_user, login_required
 from flask import (
@@ -10,30 +12,82 @@ from flask import (
 	abort
 )
 
-def users_routes(app, db, login):
+def users_routes(app, db, login, mail):
     '''Инициализация пользовательских маршрутов'''
+
+    urlsafe = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+    def send_mail(email) -> bool:
+        # redirect на регистрацию, пользователь не верифицирован
+        try:
+            token = urlsafe.dumps(email, salt='email-confirm')
+            msg = Message(
+                "Confirm Email",
+                sender="noreply@app.com",
+                recipients=[email],
+                body="Confirm Link"
+            )
+
+            data = {
+                "app_name": "Codify",
+                "title": "Confirm Email",
+                "body": f"Your link is",
+                "link": url_for("confirm", token=token, _external=True)
+            }
+
+            msg.html = render_template("mail.html", data=data)
+
+            mail.send(msg)
+        except Exception as e:
+            return False
+        return True
+
+    @app.route("/highlight")
+    def highlight():
+        response = Template(title='Highlight', info="Testing highlight", subinfo='highlight')
+        return render_template("highlight.html", response=response)
+
+    @app.route("/test/<name>")
+    def test(name: str): return str(Clients.query.filter(Clients.name == name).count())
+
     @login.user_loader
     def load_user(uid): return Clients.query.get(uid)
 
     @login.unauthorized_handler
     def unauthorized_handler():
-        # временно
         response = Template(title='Не зарегистрированное обращение', info="Не зарегистрированное обращение!", subinfo='Зарегистрируйтесь для обращения!', user=None)
-        return render_template("index2.html", nav_u=None)
+        return render_template("index.html", response=response)
 
     @app.errorhandler(404)
     def resource_not_found(e):
         '''Страница 404'''
         return f"<html><head><title>Ошибка 404</title></head><body><h1 style='margin: auto; width: 75vw; display: flex; justify-content: center;'>{ str(e) }</h1></body></html>"
     
+    @app.route("/connect")
+    def connect():
+        try:
+            print(current_user.name) # current_user.status = 1 - online
+        except Exception:
+            pass
+        return "True"
+
+    @app.route("/disconnect")
+    def disconnect():
+        try:
+            print(current_user.name) # current_user.status = 0 - offline
+        except Exception:
+            pass
+        return "True"
+
     @app.route("/")
     def index():
         '''Главная страница'''
-        response = Template(title='Авторизация', info="Пройдите регистрацию и начните тестирование ваши навыки", subinfo='Провертье свои знания', user=None)
+        response = Template(title='Авторизация', info="Пройдите регистрацию и начните тестирование ваши навыки", subinfo='Провертье свои знания')
         if 'username' in session or request.cookies.get('username'):
             return redirect(url_for('profile'))
-        # временно
-        return render_template('index.html', response=response, nav_u=None)
+        resp = make_response(render_template('index.html', response=response))
+        resp.set_cookie('auth', "null") # так же имеет username
+        return resp
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -47,23 +101,24 @@ def users_routes(app, db, login):
             sql  = Clients.query.filter(Clients.name == name)
 
             if sql.count() != 0:
-                usr = sql.first() # 
-                if check_password_hash(usr.password, pasw):
-                    login_user(usr)
-                    session['username'] = name
-                    session['lvl'] = sql[0].level
-                    session['loged'] = True
+                usr = sql.first()
+                if usr.auth == 1:
+                    if usr.verify_password(pasw):
+                        login_user(usr)
+                        session['username'] = name
 
-                    if request.form.get('setcookies'):
-                        resp = make_response(redirect(url_for('profile')))
-                        resp.set_cookie('username', name)
-                        return resp
-                    
-                    return redirect(url_for('profile'))
+                        if request.form.get('setcookies'):
+                            resp = make_response(redirect(url_for('profile')))
+                            resp.set_cookie('username', name)
+                            return resp
+                        
+                        return redirect(url_for('profile'))
+                    else:
+                        flash('Password: неверный пароль!')
                 else:
-                    flash('Password: uncorrect password')
+                    flash('Email Verification: не верефецированная почта!')
             else:
-                flash('Login: this user not exists')
+                flash('Login: такой пользователь не существует!')
                 
         return redirect(url_for('index'))
 
@@ -76,30 +131,52 @@ def users_routes(app, db, login):
         if request.method == "POST":
             uname = request.form.get("login")
             email = request.form.get("email")
-            sump = generate_password_hash(request.form.get('password'))
+            passw = request.form.get('password')
 
-            if Clients.query.filter(Clients.name == login).count() == 0:
+            if (
+                Clients.query.filter(Clients.name == uname).count() == 0 and
+                Clients.query.filter(Clients.email == email).count() == 0
+            ):
                 try:
-                    c = Clients(name=login, email=email, password=sump)
+                    send_mail(email=email)
+
+                    # Создание пользователя и добавление в БД
+                    c = Clients(name=uname, email=email)
+                    c.password(passw)
                     db.session.add(c)
                     db.session.flush()
                     db.session.commit()
-                    login_user(name)
 
                     if request.form.get('setcookies'):
                         resp = make_response(redirect(url_for('profile')))
                         resp.set_cookie('username', login)
                         return resp
-                    session['username'] = login
 
-                    return redirect(url_for('profile'))
+                    flash('Такой пользователь уже существует!', 'info')
                 except Exception as e:
                     db.session.rollback()
                     app.logger.info('Ошибка добавления в БД: %s' % e)
             else:
-                flash('User is alredy exists', 'warning')
-            
+                flash('Такой пользователь уже существует!', 'warning')
+
         return redirect(url_for('index'))
+
+    @app.route("/confirm/<token>")
+    def confirm(token: str):
+        try:
+            email = urlsafe.loads(token, salt='email-confirm', max_age=3600)
+            usr   = Clients.query.filter(Clients.email == email)
+            if usr.count() == 1:
+                usr = usr.first()
+                usr.auth = 1 if usr.auth == 0 else usr.auth
+                db.session.add(usr)
+                db.session.flush()
+                db.session.commit()
+        except SignatureExpired:
+            flash('Токен устарел!', 'warning')
+            return redirect(url_for('index'))
+        # возвращаем ответ на верификацию и перенаправляем в профиль пользователя
+        return f"Пользователь верифицирован! { email }", {"Refresh": f"3; url={ url_for('profile') }"}
 
     @app.route("/logout")
     def logout():
@@ -116,14 +193,6 @@ def users_routes(app, db, login):
             return resp
         
         return redirect(url_for('index'))
-
-    @app.route("/setcookie")
-    def setcookie():
-        return "Success"
-    
-    @app.route("/deletecookie")
-    def deletecookie():
-        return "Success"
 
     @app.route("/profile")
     @login_required

@@ -26,7 +26,7 @@ function sendSuccess() {
 
 window.onload = e => {
 	console.log("Load data!")
-    fetch(`http://127.0.0.1:5000/get/task?id=${ document.location.href.split('/').slice(-1) }`, {
+    fetch(`${ document.location.origin }/get/task?id=${ document.location.href.split('/').slice(-1) }`, {
         method: 'GET', mode: 'cors',
         cache: 'no-cache', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
