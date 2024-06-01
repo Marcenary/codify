@@ -1,7 +1,11 @@
 # users
+cert.pem
+key.pem
 other/
 migrations/
 *.cfg
+test.*
+test*.*
 .vscode/
 
 # Byte-compiled / optimized / DLL files

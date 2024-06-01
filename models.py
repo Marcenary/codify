@@ -1,4 +1,66 @@
-# Модуль моделей данных
+'''
+Модуль моделей данных
+
+Clients  # INFO: Пользователи сервиса
+	* id
+	* name  - Имя, ник, логин
+	* email - почта
+	* pwd_hash - хэш-пароль
+	* role - роль пользователя (admin, user)
+	* level - уровень, зависит от кол-во решенных заданий
+	* solved - кол-во решенных заданий
+	* tasks_id - идентификатор решенных заданий
+	* date - дата регистрации
+	* last_seen - дата последнего раза в сети
+	* auth - 1 пользователь подтвердил почту
+	* token - токен после подтверждения почты, для api обращения
+	* status - в сети или нет
+
+	+ last_time
+	+ password
+	+ verify_password
+
+Task     # INFO: Задания пользователей
+	* id
+	* name - название
+	* type - тип
+	* victorina - тип первый
+	* practic - тип второй
+	* otvet - ответ(ы) на задания
+	* task - задание
+	* lang - ЯП поддерживаемые заданием
+
+Complite # NEW INFO: Коды выполненных заданий
+	* id
+	* code - Пользовательский код
+	* date - Дата выполнения
+	* user - Автор выполненного кода
+	* lang - ЯП выполненого задания
+
+Lengs    # INFO: ЯП поддерж. сервисом, темы форума
+	* id
+	* name - Имя, название
+	* type - тип (компилируемый, интерпретируемый)
+	* icon - фото ЯП
+
+Forum    # INFO: Вопросы форума на тему Lengs
+	* id
+	* name - Имя, название
+	* size_review - последний ответ, thread
+	* author - создатель вопроса
+	* lang - ЯП, тема вопроса
+	* last_review - последний ответ на вопрос
+
+Thread   # INFO: Ответы на вопросы форума, конкретный вопрос
+	* id
+	* name - Имя, название
+	* message - сообщение, текст
+	* photo - возможное фото
+	* remember - упоминание др. пользователя в сообщении
+	* date - дата ответа
+	* forum_id - отношение к теме, вопросу
+	* author - автор вопроса
+'''
 from extensions import database as db
 from datetime import datetime
 from dataclasses import dataclass
@@ -20,7 +82,8 @@ class Clients(db.Model, UserMixin):
 
 	date      = db.Column(db.DateTime, default=datetime.now)
 	last_seen = db.Column(db.DateTime, default=datetime.now)
-	auth      = db.Column(db.Integer,  default=0) # 1 - пользователь подтвердил почту
+	auth      = db.Column(db.Integer,  default=0)
+	# token     = db.Column(db.Text)
 	status    = db.Column(db.Integer,  default=0)
 
 	def last_time(self):
@@ -44,11 +107,20 @@ class Task(db.Model):
 	practic   = db.Column(db.Text,    nullable=False, default='[]')
 	otvet     = db.Column(db.Text,    nullable=False) 
 	task      = db.Column(db.Text,    nullable=False) 
-	lang      = db.Column(db.Text,    nullable=False, default='[1, 2]') # TODO: изменить на id из таблицы Lengs
+	lang      = db.Column(db.Text,    nullable=False, default='[1, 2]')
 	
 	creator   = db.Column(db.Integer, db.ForeignKey('Clients.id'))
 
 	def __repr__(self): return f"<Task { self.id }>"
+
+class Complite(db.Model):
+	__tablename__ = "Complite"
+
+	id   = db.Column(db.Integer,  primary_key=True, unique=True)
+	code = db.Column(db.Text,     nullable=False)
+	date = db.Column(db.DateTime, default=datetime.now)
+	user = db.Column(db.Integer,  db.ForeignKey('Clients.id'), nullable=False)
+	lang = db.Column(db.Integer,  db.ForeignKey('Lengs.id'))
 
 class Lengs(db.Model):
 	__tablename__ = "Lengs"
@@ -60,32 +132,19 @@ class Lengs(db.Model):
 
 	def __repr__(self): return f"{ self.name }"
 
-# class Properties:
-# 	__tablename__ = "Properties"
-
-# 	id        = db.Column(db.Integer,  primary_key=True, unique=True)
-# 	theme     = db.Column(db.Integer)
-# 	new_name  = db.Column(db.Integer)
-# 	new_email = db.Column(db.Integer)
-# 	new_passw = db.Column(db.Integer)
-# 	deanon    = db.Column(db.Integer)
-# 	...
-# 	# TODO: Добавить все настройки позже - boolean(True-включиены, False-выключенны)
-# 	creator = db.Column(db.Integer, db.ForeignKey('Clients.id'))
-
-class Forum(db.Model): # Threads
+class Forum(db.Model):
 	__tablename__ = "Forum"
 
 	id      = db.Column(db.Integer,  primary_key=True, unique=True)
 	name    = db.Column(db.Text,     nullable=False)
 	size_review = db.Column(db.Integer)
-	author      = db.Column(db.Integer, db.ForeignKey('Clients.id'), nullable=False) # INFO: Обязателен, тот кто создаёт
-	lang        = db.Column(db.Text,    db.ForeignKey('Lengs.id')) # INFO: ЯП вопроса
+	author      = db.Column(db.Integer, db.ForeignKey('Clients.id'), nullable=False)
+	lang        = db.Column(db.Text,    db.ForeignKey('Lengs.id'))
 	last_review = db.Column(db.Integer, db.ForeignKey('Thread.id'))
 
 	def __repr__(self): return f"Theme name: { self.id }"
 
-class Thread(db.Model): # Related Reviews
+class Thread(db.Model):
 	__tablename__ = "Thread"
 
 	id       = db.Column(db.Integer,  primary_key=True, unique=True)

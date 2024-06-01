@@ -85,24 +85,24 @@ def tasks_routes(app, db):
 	@tasks_bp.route("/get/<n>")
 	def api(n: str):
 		'''API маршруты для облегчения обращения и получения нужной информации'''
-		if n == "tasks":
-			tasks, res = Task.query.all(), []
-			for task in tasks:
-				res.append({
-					"id": task.id,
-					"name": task.name,
-					"task": task.task,
-					"lang": json.loads(task.lang),
-				})
-			print(len(res))
-			return json.dumps(res)
+		# if n == "tasks":
+		# 	tasks, res = Task.query.all(), []
+		# 	for task in tasks:
+		# 		res.append({
+		# 			"id": task.id,
+		# 			"name": task.name,
+		# 			"task": task.task,
+		# 			"lang": json.loads(task.lang),
+		# 		})
+		# 	print(len(res))
+		# 	return json.dumps(res)
 
-		if n == "task":
-			n = request.args.get('id')
-			task = Task.query.filter_by(id=n).first()
-			task = { i: task.__dict__[i] for i in task.__dict__ if i != '_sa_instance_state' }
-			task["recipient"] = session.get('username')
-			return task
+		# if n == "task":
+		# 	n = request.args.get('id')
+		# 	task = Task.query.filter_by(id=n).first()
+		# 	task = { i: task.__dict__[i] for i in task.__dict__ if i != '_sa_instance_state' }
+		# 	task["recipient"] = session.get('username')
+		# 	return task
 			
 		if n == "add_page":
 			response = Template(title="Добавить задание", info="", subinfo="")

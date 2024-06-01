@@ -1,4 +1,5 @@
 from models import Clients, Template, User
+from models import Lengs # Remove
 
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
@@ -44,8 +45,9 @@ def users_routes(app, db, login, mail):
 
     @app.route("/highlight")
     def highlight():
+        lengs = Lengs.query.all()
         response = Template(title='Highlight', info="Testing highlight", subinfo='highlight')
-        return render_template("highlight.html", response=response)
+        return render_template("highlight.html", response=response, lengs=lengs)
 
     @app.route("/test/<name>")
     def test(name: str): return str(Clients.query.filter(Clients.name == name).count())
