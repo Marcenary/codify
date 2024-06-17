@@ -1,115 +1,81 @@
-import subprocess as sp
-from os import remove
-from os.path import exists
-from time import sleep
-
 from models import Task
-from flask import session, jsonify, json
+from flask import session, request, jsonify, json, abort
+from flask_login import current_user
+from flask_login.mixins import AnonymousUserMixin
 from flask_restful import Resource, reqparse
 
-from compile.languages.Interpreter import Python
+from compile.languages.Interpreter import Python, JavaScript, TypeScript, Ruby, PHP
 
 app = None
 supports_lang = {
-    "Python": {
-        "class": Python,
-        "ext": "py",
-        "program": "python3.10"
-    },
-    "JavaScript": {
-        "class": "JavaScript",
-        "ext": "js",
-        "program": "node"
-    },
-    "TypeScript": {
-        "class": "TypeScript",
-        "ext": "ts",
-        "program": "tode" # tode.sh - typescript tsc, nodejs
-    },
-    "Ruby": {
-        "class": "Ruby",
-        "ext": "rb",
-        "program": "ruby"
-    },
-    "C": {
-        "class": "CLang",
-        "ext": "c",
-        "program": "gcc"
-    },
-    "C++": {
-        "class": "CPlusPlus",
-        "ext": "cpp",
-        "program": "g++"
-    },
-    "C#": {
-        "class": "CSharp",
-        "ext": "cs",
-        "program": "cs" # or dotnet
-    },
-    "Java": {
-        "class": "Java",
-        "ext": "java",
-        "program": "jythonc" # jythonc.sh - javac, java, jython
-    },
+    "Python": Python,
+    "JavaScript": JavaScript,
+    "TypeScript": TypeScript,
+    "Ruby": Ruby,
+    "PHP": PHP
 }
 parser = reqparse.RequestParser()
 
 class TasksResource(Resource):
-    def get(self):
-        tasks, res = Task.query.all(), []
-        for task in tasks:
-            res.append({
-				"id": task.id,
-				"name": task.name,
-				"task": task.task,
-				"lang": json.loads(task.lang),
-            })
-        return jsonify(res)
+    def get(self, types):
+        _id = 0 if request.args.get("id") is None else int(request.args.get("id"))
+        tasks = Task.query.all()
 
-class TaskResource(Resource):
-    def get(self, id: int):
-        task = Task.query.filter_by(id=id).first()
-        task = { i: task.__dict__[i] for i in task.__dict__ if i != '_sa_instance_state' }
-        task["recipient"] = session.get('username')
-        return jsonify(task)
+        if types == "tasks":
+            out = []
+            count = _id * 6
+            for i in range(0, 6):
+                index = count+i
+                try:
+                    out.append({
+                        "id": tasks[index].id,
+                        "name": tasks[index].name,
+                        "task": tasks[index].task,
+                        "lang": json.loads(tasks[index].lang),
+                    })
+                except IndexError: pass
+        
+        elif types == "task" and _id != "":
+            out = Task.query.filter_by(id=_id).first()
+            out = { i: out.__dict__[i] for i in out.__dict__ if i != '_sa_instance_state' }
+            out["recipient"] = session.get('username')
+        
+        elif types == "total":
+            return jsonify({ "total": tasks.count() })
+        
+        else: abort(404)
 
-class CompileResource(Resource): # как получить код?
+        return jsonify(out)
+
+class CompileResource(Resource):
     def get(self):
         return { "data": f"Compiled code from { 'python' } lang." }
     
     def post(self):
         parser.add_argument('lang')
+        parser.add_argument('name')
         parser.add_argument('code')
         data = parser.parse_args()
 
         if data["lang"] != None and data["lang"] in supports_lang:
-            num    = 0
-            lang   = supports_lang[data["lang"]]
-            class_ = lang["class"]
-            ext    = lang["ext"]
-            prog   = lang["program"]
+            class_ = supports_lang[data["lang"]]
+        
+        try:
+            user = "Anon"
+            if not isinstance(current_user, AnonymousUserMixin):
+                user = current_user.name
 
-        search = "test{}.{}"
-        name = search.format("", ext)
-        while exists(name):
-            num += 1
-            name = search.format(num, ext)
-        else:
-            with open(search.format(num if num > 0 else "", ext), "w") as f:
-                f.write(data["code"])
+            caller = class_(data["name"], data["code"], user=user)
+            if caller.build():
+                app.logger.info("Command output: %s", True)
+            out = caller.result
+        except Exception as e:
+            out = str(e)
 
-        # run = Python(name) # проверка кода и его сборка с возвратом результата
-        process = sp.run([prog, name], capture_output=True)
-        remove(name)
-
-        out = process.stdout
-        out = (out.decode() if out != b"" else process.stderr.decode()).strip().split("\n")[-1]
-
-        app.logger.info("Command output: %s", out)
         return {
             "data": f"Compiled code from { data['lang'] } lang.",
             "lang": data["lang"],
-            "code": data["code"],
+            "name": data["name"],
             "result": out
         }
 
@@ -117,9 +83,7 @@ def api_routes(api, db):
     '''Инициализация маршрутов API'''
     global app
     app = api.app
-    api.add_resource(TasksResource,   "/api/v1/get/tasks")
-    api.add_resource(TaskResource,    "/api/v1/get/task/<int:id>") # ?
+    api.add_resource(TasksResource,   "/api/v1/get/<types>")
     api.add_resource(CompileResource, "/api/v1/compile/")
     # api.add_resource(TasksResource,   "/api/<token>/v1/get/tasks")
-    # api.add_resource(TaskResource,    "/api/<token>/v1/get/task/<int:id>") # ?
     # api.add_resource(CompileResource, "/api/<token>/v1/compile/")

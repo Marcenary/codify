@@ -120,6 +120,7 @@ class Complite(db.Model):
 	code = db.Column(db.Text,     nullable=False)
 	date = db.Column(db.DateTime, default=datetime.now)
 	user = db.Column(db.Integer,  db.ForeignKey('Clients.id'), nullable=False)
+	task = db.Column(db.Integer,  db.ForeignKey('Task.id'), nullable=False)
 	lang = db.Column(db.Integer,  db.ForeignKey('Lengs.id'))
 
 class Lengs(db.Model):

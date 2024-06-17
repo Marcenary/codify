@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}
+    <title>{{ response.title }}</title>
+    <style>
+        body { height: 100vh; }
+        .form-signin {
+            max-width: 330px;
+            padding: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}d-flex align-items-center py-4 bg-body-tertiary{% endblock %}
+
+{% block content %}
+    <div class="main form-signin w-100 m-auto">
+        <form action="/login" method="POST" >
+            <img class="mb-4" src="{{ url_for('static', filename='img/logo.svg') }}" alt="" width="72" height="57">
+            <h1 class="h5 mb-3 fw-normal">Пожалуйста авторизуйтесь</h1>
+            <div class="form-floating mb-3">
+                <input type="text" name="login" class="form-control" id="floatingInput" placeholder="original.login">
+                <label for="floatingInput">Логин</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password">
+                <label for="floatingPassword">Пароль</label>
+            </div>
+            <div class="checkbox mb-3">
+                <label>
+                    <input type="checkbox" name="setcookies" value="remember-me"> Запомнить меня
+                </label>
+            </div>
+            <div class="form-floating text-center mb-3">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            {% if category == "info" %}
+                                <span class="text-center text-primary-emphasis">{{ message }}</span>
+                            {% else %}
+                                <span class="text-center text-danger">{{ message }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <button class="btn btn-primary w-100 py-2" type="submit">Авторизация</button>
+            <p class="mt-5 mb-3 text-body-secondary">© 2022–2024</p>
+        </form>
+    </div>
+{% endblock %}

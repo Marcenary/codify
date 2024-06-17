@@ -1,23 +1,51 @@
 import { Compile } from '/static/js/compile.js'
 
-const code = $('#code'), run = $('#run'), sel = $('select')
-const compile = new Compile()
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
+
+const
+    editor   = ace.edit("editor"),
+    readonly = ace.edit("run"),
+    sel      = $('#select'),
+    compile  = new Compile()
+
+function editorSetup(lang) {
+    let theme = "ace/theme/one_dark";
+
+    editor.setTheme(theme);
+    editor.commands.addCommand({
+        name: 'myTestingCommand',
+        bindKey: { win: 'Ctrl-S',  mac: 'Command-S' },
+        exec: editor => { $("#test").click() },
+        readOnly: true,
+    });
+    
+    readonly.setTheme(theme);
+    readonly.setReadOnly(true);
+    
+    $('#editor').css("fontSize", '16px');
+    $('#run').css("fontSize", '16px');
+}
 
 function sendSuccess() {
     const data = {
         status_task: 'success',
         id_task: document.location.href.split('/').slice(-1)[0],
-        performed_task: JSON.parse(sessionStorage.getItem('task')).recipient
+        performed_task: JSON.parse(sessionStorage.getItem('task')).recipient,
+        code: editor.getValue(),
+        lang: sel.text()
     }
     console.log(data)
-    fetch("http://127.0.0.1:5000/task", {
+    
+    fetch(`${ document.location.origin }/tasks/task`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
     .then(data => {
-        if (data.redirected)
-            window.location.replace(data.url)
+        if (data.redirected) window.location.replace(data.url)
         else data = data.json()
         console.log(data)
     })
@@ -25,8 +53,7 @@ function sendSuccess() {
 }
 
 window.onload = e => {
-	console.log("Load data!")
-    fetch(`${ document.location.origin }/get/task?id=${ document.location.href.split('/').slice(-1) }`, {
+    fetch(`${ document.location.origin }/api/v1/get/task?id=${ document.location.href.split('/').slice(-1) }`, {
         method: 'GET', mode: 'cors',
         cache: 'no-cache', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
@@ -34,26 +61,38 @@ window.onload = e => {
     })
     .then(data => data.json())
     .then(json => sessionStorage.setItem("task", JSON.stringify(json)))
+    console.log("Load data!")
+    editorSetup()
     // если задание уже было пройдено не засчитывать ни опыт не кол-во вып.
     // записать в переменную и сравнивать
     // просто перенаправлять на главную без записи в бд
     if (localStorage.getItem("lang") != null)
-        code.val(localStorage.getItem("code"))
+        editor.setValue(localStorage.getItem("code"))
 }
 
 setInterval(e => {
-	if ( code.val() != localStorage.getItem("code") ) {
+	if ( editor.getValue() != localStorage.getItem("code") ) {
 		console.log("Data save!")
-		localStorage.setItem("code", code.val())
-		localStorage.setItem("lang", sel.val())
+		localStorage.setItem("code", editor.getValue())
+		localStorage.setItem("lang", sel.text())
 	}
 }, 15000)
 
+// for all
 function pyClick() {
-    const data = {}
-    data["code"] = code.val()
-    data["run"]  = run.val()
-    fetch("http://127.0.0.1:5000/compile", {
+    const data = {
+        lang: sel.text(),
+        name: 0,
+        code: `${ editor.getValue() }\n\n${ readonly.getValue() }`,
+    }
+    
+    // if (data.lang == "Python")
+    // if (data.lang == "JavaScript")
+    // if (data.lang == "TypeScript")
+    // if (data.lang == "Ruby")
+    // if (data.lang == "PHP")
+    
+    fetch(`${ document.location.origin }/tasks/compile`, {
         method: 'POST', mode: 'cors',
         cache: 'no-cache', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
@@ -63,22 +102,33 @@ function pyClick() {
     .then(data => data.json())
     .then(json => {
         $('#log').text("")
-        $('#log').text(json)
-
+        json[0].split(/\b/)
+        let res = json.join(''), out = ''
+        console.log(res);
+        
         json = json.map(i => (i != "True" && i != "False") ? i : (i == "True" ? true : false))
         json = json.every(i => i)
+
+        res = res.replace(/True/g, "<span class='text-success'>Верное решение<span><br>")
         if (json) {
-            alert("Task fullfilled")
+            $("#test").removeClass("btn-primary")
+            $("#test").addClass("btn-outline-primary")
+            $("#submit").removeClass("btn-outline-success")
+            $("#submit").addClass("btn-success")
             document.querySelector('#submit').onclick = sendSuccess
         }
+        else res = res.replace(/False/g, "<span class='text-danger'>Не верное значение</span><br>")
+        $('#log').html(res)
 
-    }).catch(err => { console.log(err); alert("Ошибка в коде") })
+    }).catch(err => { console.log(err); })
 }
 
 function jsClick() {
     const data = {}
-    data["code"] = code.val()
-    data["run"]  = run.val()
+    data["code"] = editor.getValue()
+    data["run"]  = readonly.getValue()
+
+    console.log(data);
 
     let res = compile.compile(data)
 
@@ -92,21 +142,30 @@ function jsClick() {
     }
 }
 
-sel.change(e => {
+$(".lang").click(e => {
+    $('#select').text(e.target.value);
     const
         task  = JSON.parse(sessionStorage.getItem("task")),
-        value = e.target.value == 'javascript' ? 'js' : e.target.value
+        value = {
+            none: 'none',
+            Python: 'python',
+            JavaScript: 'javascript',
+            TypeScript: 'typescript',
+            Ruby: 'ruby',
+            PHP: 'php'
+        }[e.target.value]
+
     let all_code = compile.task(task.practic, task.otvet, value)
-    code.val(all_code[0])
-    run.val(all_code[1])
+    editor.setValue(all_code[0])
+    readonly.setValue(all_code[1])
+
+    editor.session.setMode(`ace/mode/${value}`)
+    readonly.session.setMode(`ace/mode/${value}`)
 	
-    if (value == 'js')
+    if (value == 'javascript')
         $('#test').click(jsClick)
-        // document.querySelector('#test').onclick = jsClick
 	else if (value == 'python')
         $('#test').click(pyClick)
-        // document.querySelector('#test').onclick = pyClick
     else if (value == 'none')
         $('#test').click(() => console.log("Choice lang"))
-        // document.querySelector('#test').onclick = () => console.log("Choice lang")
 })

@@ -24,10 +24,10 @@ class GuardModelView(ModelView):
             return current_user.is_authenticated
 
 def regist_admin_panel(admin, db, **kwargs):
-    from models import Clients, Task, Lengs
+    from models import Clients, Task, Lengs, Complite
     
     admin.add_view(GuardModelView(Clients, db.session, name="Пользователи"))
     admin.add_view(GuardModelView(Task,    db.session, name="Задания"))
     admin.add_view(GuardModelView(Lengs,   db.session, name="Языки Программирования"))
-    # admin.add_view(ModelView(Forum, database.session, name="Форум?"))
+    admin.add_view(ModelView(Complite,     db.session, name="Пользовательский код"))
     admin.add_view(PanelView(name="На главную"))

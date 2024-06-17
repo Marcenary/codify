@@ -1,5 +1,9 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<h1>Welcome {{ current_user.name }} to Dashboard!</h1>
+<h1 class="text-light">Добро пожаловать {{ current_user.name }} в Административную панель!</h1>
+<script>
+    document.querySelector('html').setAttribute("data-bs-theme", "dark")
+    document.querySelector('body').style.backgroundColor = "#1b0e3e"
+</script>
 {% endblock %}

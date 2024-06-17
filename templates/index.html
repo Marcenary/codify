@@ -1,74 +1,48 @@
-{% extends 'base.html' %}
-{% block title %}
-	<title>{{ response.title }}</title>
-{% endblock %}
-{% block content %}
-	<main class="hero is-info py-6 px-6">
-		<div class="box my-5 py-4 mx-6 px-6">
-			<div class="columns">
-				<form action="/login" method="POST" class="column">
-					<label class="label">
-						<span class="is-size-5 has-text-black has-text-weight-normal my-3 mx-3">Логин</span>
-						<input type="text" name="login" class="input is-info is-size-6 my-3 mx-3" required>
+{% extends 'auth.html' %}
+{% block main %}
+	<div class="container col-xl-10 col-xxl-8 px-4 py-5">
+		<div class="row align-items-center g-lg-5 py-5">
+			<div class="col-lg-7 text-center text-lg-start">
+				<h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Зарегистрируйся и начни изучать программирования!</h1>
+				<p class="col-lg-10 fs-4">Совершенствуйте свои навыки разработки, обучаясь вместе со своими коллегами, которые постоянно бросают вызов и развивают вашу практику кодирования.</p>
+			</div>
+			<div class="col-md-10 mx-auto col-lg-5">
+				<form action="/sign" method="POST" class="p-4 p-md-5 border rounded-3 bg-body-tertiary">
+					<div class="form-floating mb-3">
+						<input type="text" name="login" class="form-control" id="floatingInput" placeholder="original.login">
+						<label for="floatingInput">Логин</label>
+					</div>
+					<div class="form-floating mb-3">
+						<input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+						<label for="floatingInput">Почта</label>
+					</div>
+					<div class="form-floating mb-3">
+						<input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password">
+						<label for="floatingPassword">Пароль</label>
+					</div>
+					<div class="checkbox mb-3">
+						<label>
+							<input type="checkbox" name="setcookies" value="remember-me"> Запомнить меня
+						</label>
+					</div>
+					<div class="form-floating text-center mb-3">
 						{% with messages = get_flashed_messages(with_categories=true) %}
 							{% if messages %}
 								{% for category, message in messages %}
 									{% if category == "info" %}
-										<span class="is-size-5 has-text-success has-text-weight-normal my-3 mx-3">{{ message }}</span>
+										<span class="text-center text-primary-emphasis">{{ message }}</span>
 									{% else %}
-										<span class="is-size-5 has-text-danger has-text-weight-normal my-3 mx-3">{{ message }}</span>
+										<span class="text-center text-danger">{{ message }}</span>
 									{% endif %}
 								{% endfor %}
 							{% endif %}
 						{% endwith %}
-					</label>
-					<label class="label is-hidden">
-						<span class="is-size-5 has-text-black has-text-weight-normal my-3 mx-3">Email</span>
-						<input type="text" name="email" class="input is-size-6 my-3 mx-3" required>
-					</label>
-					<label class="label">
-						<span class="is-size-5 has-text-black has-text-weight-normal my-3 mx-3">Пароль</span>
-						<input type="password" name="password" class="input is-size-6 my-3 mx-3" required>
-					</label>
-					<label class="label" id="reg">
-						<input type="checkbox" class="checkbox  is-size-6 my-3 mx-3">
-						<span class="has-text-black has-text-weight-normal my-3">Зарегистрироваться</span>
-					</label>
-					<label class="label"><!-- задать куки, сессия всегда при входе -->
-						<input type="checkbox" name="setcookies" class="checkbox  is-size-6 my-3 mx-3">
-						<span class="has-text-black has-text-weight-normal my-3">Запомнить</span>
-					</label>
+					</div>
+					<button class="w-100 btn btn-lg btn-primary" type="submit">Зарегистрироваться</button>
+					<hr class="my-4">
+					<small class="text-body-secondary">Нажимая на "Зарегистрироваться",<br>вы соглашаетесь Политикой Конфиденциальности.</small>
 				</form>
-				<div class="column"></div>
-			</div>
-			<div class="columns mx-4 my-4">
-				<div class="column"></div>
-				<div class="column"></div>
-				<div class="column">
-					<button id="submit" class="button is-fullwidth is-info">OK</button>
-				</div>
-				<div class="column"></div>
-				<div class="column"></div>
-				<div class="column"></div>
 			</div>
 		</div>
-
-		<script>
-			let form = $('form'), pass = $('input[name="password"]'), hide = $('label.is-hidden')
-
-			$('#reg').on('change', e => {
-				if (e.target.checked) {
-					form.attr('action', '/sign')
-					setTimeout(() => hide.attr('class', 'label'), 350)
-				}
-				else {
-					form.attr('action', '/login')
-					setTimeout(() => hide.attr('class', 'label is-hidden'), 350)
-				}
-			})
-			$('#submit').click(async e => {
-				form.submit() // e.preventDefault()
-			})
-		</script>
-	</main>
+	</div>
 {% endblock %}

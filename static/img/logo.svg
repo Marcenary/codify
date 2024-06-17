@@ -1,74 +1,15 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="512"
-   height="512"
-   viewBox="0 0 512 512"
-   version="1.1"
-   id="svg5"
-   inkscape:version="1.2 (dc2aedaf03, 2022-05-15)"
-   sodipodi:docname="logo.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview7"
-     pagecolor="#505050"
-     bordercolor="#eeeeee"
-     borderopacity="1"
-     inkscape:showpageshadow="0"
-     inkscape:pageopacity="0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#505050"
-     inkscape:document-units="px"
-     showgrid="false"
-     inkscape:zoom="0.78030338"
-     inkscape:cx="96.116462"
-     inkscape:cy="275.53386"
-     inkscape:window-width="1366"
-     inkscape:window-height="745"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
-  <defs
-     id="defs2">
-    <rect
-       x="6.4077641"
-       y="6.4077641"
-       width="503.65025"
-       height="97.398012"
-       id="rect88" />
-    <rect
-       x="69.203852"
-       y="176.85429"
-       width="62.796088"
-       height="129.43683"
-       id="rect82" />
-    <rect
-       x="71.766958"
-       y="176.85429"
-       width="412.66001"
-       height="289.63094"
-       id="rect76" />
-  </defs>
-  <g
-     inkscape:label="Слой 1"
-     inkscape:groupmode="layer"
-     id="layer1">
-    <text
-       xml:space="preserve"
-       id="text86"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80px;line-height:1.25;font-family:Mo;-inkscape-font-specification:Mo;white-space:pre;shape-inside:url(#rect88);display:inline;fill:#000000;fill-opacity:1;stroke:none"
-       x="449.9408"
-       y="0"
-       transform="translate(0,146)"><tspan
-         x="10.479492"
-         y="79.394628"
-         id="tspan247"><tspan
-           style="text-align:center;text-anchor:middle;fill:#ffffff"
-           id="tspan245">/RESOLVE/it</tspan></tspan></text>
-  </g>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_665_8)">
+<rect width="512" height="512" rx="20" fill="white" fill-opacity="0.1"/>
+<path d="M50 12.5H412C460.325 12.5 499.5 51.6751 499.5 100V462C499.5 482.711 482.711 499.5 462 499.5H100C51.6751 499.5 12.5 460.325 12.5 412V50C12.5 29.2893 29.2893 12.5 50 12.5Z" fill="#E7E3FF" stroke="#E7E3FF" stroke-width="25"/>
+<circle cx="433" cy="433" r="50" fill="#3D76E6"/>
+<path d="M56 18.5H206C364.782 18.5 493.5 147.218 493.5 306V456C493.5 476.711 476.711 493.5 456 493.5H306C147.218 493.5 18.5 364.782 18.5 206V56C18.5 35.2893 35.2893 18.5 56 18.5Z" stroke="black" stroke-width="25"/>
+<path d="M71 31H191C351.163 31 481 160.837 481 321V441C481 463.091 463.091 481 441 481H321C160.837 481 31 351.163 31 191V71C31 48.9086 48.9086 31 71 31Z" stroke="#2C1867" stroke-width="20"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M156.5 370.5C171.5 385.5 195.275 393 227.825 393H281.825C309.425 393 329.975 387.3 343.475 375.9C356.975 364.35 364.4 345.9 365.75 320.55C366.2 316.65 365.375 313.65 363.275 311.55C361.325 309.3 358.4 308.175 354.5 308.175C347 308.175 342.875 312.15 342.125 320.1C341.075 338.7 335.975 351.6 326.825 358.8C317.675 365.85 302.675 369.375 281.825 369.375H227.825C210.425 369.375 196.625 367.125 186.425 362.625C176.225 358.125 168.875 350.775 164.375 340.575C159.875 330.375 157.625 316.575 157.625 299.175V196.8C157.625 179.4 159.8 165.6 164.15 155.4C168.65 145.05 176 137.7 186.2 133.35C196.4 128.85 210.125 126.6 227.375 126.6H281.825C302.675 126.6 317.675 130.2 326.825 137.4C335.975 144.45 341.075 157.275 342.125 175.875C342.271 177.427 342.546 178.827 342.95 180.076V183L286.4 274.35L225.9 177.7C223.1 173.2 219.45 172.35 214.95 175.15C210.55 178.15 209.7 181.8 212.4 186.1L279.6 292.3V359.05C279.6 364.35 282.2 367 287.4 367C292.7 367 295.35 364.35 295.35 359.05V292.3L363.15 186.1C363.892 184.949 364.391 183.857 364.649 182.824C365.717 180.894 366.084 178.427 365.75 175.425C364.4 150.075 356.975 131.7 343.475 120.3C329.975 108.75 309.425 102.975 281.825 102.975H227.375C194.975 102.975 171.275 110.4 156.275 125.25C141.425 140.1 134 163.95 134 196.8V299.175C134 331.725 141.5 355.5 156.5 370.5Z" fill="#361C60"/>
+</g>
+<defs>
+<clipPath id="clip0_665_8">
+<rect width="512" height="512" rx="20" fill="white"/>
+</clipPath>
+</defs>
 </svg>

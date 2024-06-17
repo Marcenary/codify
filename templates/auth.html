@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}
+	<title>{{ response.title }}</title>
+{% endblock %}
+{% block content %}
+    <div class="wrapper {{  'flex-column custom-bg-color' if not current_user.is_authenticated else '' }}">
+        {% if current_user.is_authenticated %}
+            <aside id="sidebar">
+                <div class="d-flex">
+                    <button id="toggle-btn" type="button">
+                        <i class="lni lni-grid-alt"></i>
+                    </button>
+                    <div class="sidebar-logo">
+                        <a href="/" class="text-decoration-none">Codify</a>
+                    </div>
+                </div>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-item">
+                        <a href="/profile" class="sidebar-link text-decoration-none">
+                            <i class="lni lni-user"></i>
+                            <span>Профиль</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('tasks.list_tasks') }}" class="sidebar-link text-decoration-none">
+                            <i class="lni lni-agenda"></i>
+                            <span>Задания</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('admin.index') }}" class="sidebar-link text-decoration-none">
+                            <i class="lni lni-protection"></i>
+                            <span>Настройки</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('forum.forum_n') }}" class="sidebar-link text-decoration-none">
+                            <i class="lni lni-agenda"></i>
+                            <span>Форум</span>
+                        </a>
+                    </li>
+                    <!-- <li class="sidebar-item">
+                        <a href="#" class="sidebar-link text-decoration-none has-dropdown collapsed"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#multi" aria-expanded="false" aria-controls="multi">
+                            <i class="lni lni-layout"></i>
+                            <span>Multi Level</span>
+                        </a>
+                        <ul id="multi" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link text-decoration-none collapsed" data-bs-toggle="collapse"
+                                data-bs-target="#multi-two" aria-expanded="false" aria-controls="multi-two">Two Links</a>
+                                <ul id="multi-two" class="sidebar-dropdown list-unstyled collapse">
+                                    <li class="sidebar-item">
+                                        <a href="#" class="sidebar-link text-decoration-none">Link 1</a>
+                                    </li>
+                                    <li class="sidebar-item">
+                                        <a href="#" class="sidebar-link text-decoration-none">Link 2</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li> -->
+                </ul>
+                <div class="sidebar-footer">
+                    <a href="/logout" class="sidebar-link text-decoration-none">
+                        <i class="lni lni-exit"></i>
+                        <span>Выйти</span>
+                    </a>
+                </div>
+            </aside>
+            <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+        {% else %}
+            <header class="p-3 custom-bg-color custom-bottom-border">
+                <div class="container">
+                    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                            <li><a href="{{ url_for('index') }}" class="nav-link px-2 text-secondary">Codify</a></li>
+                            <li><a href="{{ url_for('about') }}" class="nav-link px-2 text-white">О Сервисе</a></li>
+                            <li><a href="{{ url_for('help') }}" class="nav-link px-2 text-white">Помощь</a></li>
+                            <li><a href="{{ url_for('help') }}#help" class="nav-link px-2 text-white">Контакты</a></li>
+                        </ul>                
+                        <div class="text-end">
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-light me-2">Авторизация</a>
+                            <a href="{{ url_for('index') }}" class="btn btn-primary">Регистрация</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        {% endif %}
+        {% block main %}{% endblock %}
+    </div>
+{% endblock %}

@@ -1,60 +1,91 @@
-{% extends 'base.html' %}
+{% extends 'auth.html' %}
 
-{% block title %}
-	<title>{{ response.title }}</title>
-	<style>
-		a { text-decoration: none; }
-	</style>
-{% endblock %}
-
-{% block content %}
-	<div class="hero is-info">
-		<div class="box my-5 py-4 mx-6"><!-- has-background-info-dark -->
-
+{% block main %}
+	<main class="d-flex flex-column gap-0 row-gap-5" style="height: 100vh; background-color: #1b1a5f;">
+		{% include 'header.html' %}
+		<div class="container text-center">
+			
 		</div>
-	</div>
-	<script>
-		window.addEventListener('load', () => {
-			const tile = document.querySelector(".box")
+		<nav aria-label="Page navigation example">
+			<ul class="pagination justify-content-center">
+				
+			</ul>
+		</nav>
+		<script>
+			let count = 0;
+			window.addEventListener('load', () => {
+				const tile = document.querySelector(".container")
+				const pag = document.querySelector(".pagination")
+				const lengs = {
+					{% for i in lengs %}
+						"{{ i.id }}": [ "{{ i.name }}", "{{ i.icon }}" ],
+					{% endfor %}
+				};
 
-			$('button').click(e => window.location.replace(`${ location.origin }/get/add_page`)) // FIXME: <-
-	
-			function splitArray(array=[], size=3) {
-				// array массив, можно использовать массив объектов
-				// размер подмассива
-				let subarray = []; //массив в который будет выведен результат.
-				for (let i = 0; i <Math.ceil(array.length/size); i++)
-					subarray[i] = array.slice((i*size), (i*size) + size);
-				return subarray
-			}
+				// button
+				$('#add-task').click(e => window.location.replace(`${ location.origin }/get/add_page`)) // FIXME: <-
+		
+				function splitArray(array=[], size=3) {
+					// array массив, можно использовать массив объектов
+					// размер подмассива
+					let subarray = []; //массив в который будет выведен результат.
+					for (let i = 0; i <Math.ceil(array.length/size); i++)
+						subarray[i] = array.slice((i*size), (i*size) + size);
+					return subarray
+				}
 
-			const create_html = (el) => `
-				<div class="column">
-					<a href="${ location.origin }/task/${ el.id }">
-						<article class="notification has-background-${['link', 'info', ][Math.floor(Math.random() * 2)]}${Math.floor(Math.random() * 2) == 1 ? '-dark': ''}">
-							<p class="title has-text-white is-size-5">${ el.name }</p>
-							<p class="subtitle has-text-white">${ el.task.slice(0, 101) }...</p>
-							<p class="has-text-white has-text-right">${ el.lang.join(", ") }</p>
-						</article>
-					</a>
+				const create_html = (el) => `
+				<div class="col">
+					<div class="card">
+						<h5 class="card-header">Задание ${ el.id }</h5>
+						<div class="card-body">
+							<h5 class="card-title">${ el.name }</h5>
+							<p class="card-text">${ el.task.slice(0, 101) }...</p>
+							<p class="card-text text-end">${ el.lang.map(el => `<img class="icon" width="25px" src="${ lengs[el][1] }" alt="${ lengs[el][0] }">`).join("") }</p>
+							<a href="${ location.origin }/tasks/task/${ el.id }" class="btn btn-primary">Выполнить</a>
+						</div>
+					</div>
 				</div>`
 
-			function push_html(tasks) {
-				tmp = splitArray(tasks), str = '', tile.innerHTML = ""
-				
-				for (let i = 0; i < tmp.length; ++i) {
-					str += `<div class="columns">`
-					for (el of tmp[i]) str += create_html(el)
-					str += `</div>`
+				function push_html(tasks) {
+					tmp = splitArray(tasks), str = '', tile.innerHTML = ""
+					
+					for (let i = 0; i < tmp.length; ++i) {
+						str += `<div class="row mb-4 align-items-start">`
+						for (el of tmp[i]) str += create_html(el)
+						str += `</div>`
+					}
+					tile.innerHTML = str
 				}
-				tile.innerHTML = str
-			}
 
-			fetch(`${ location.origin }{{ url_for("tasks.api", n='tasks') }}`, {
-				headers: { "Content-type": "application/json; charset=UTF-8" }
+				function get_tasks(id=0) {
+					fetch(`${ location.origin }/api/v1/get/tasks?id=${ id }`, {
+						headers: { "Content-type": "application/json; charset=UTF-8" }
+					})
+					.then(res => res.json())
+					.then(json => push_html(json))
+				}
+
+				function pagination() {
+					str = '<li class="page-item"><button class="page-link">Previous</button></li>',
+					pag.innerHTML = ""
+					for (let i = 0; i < count+3; ++i) {
+						str += 	`<li class="page-item"><button value="${ i }" class="page-link">${ i+1 }</button></li>`
+					}
+					str += `<li class="page-item"><button class="page-link">Next</button></li>`
+					pag.innerHTML = str
+				}
+				
+				$(".page-link").click(e => {
+					count = e.target.nodeValue
+					console.log(count);
+					get_tasks(num)
+					pagination()
+				})
+
+				get_tasks()
+				pagination()
 			})
-			.then(res => res.json())
-			.then(json => push_html(json))
-		})
-	</script>
+		</script>
+	</div>
 {% endblock %}

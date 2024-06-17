@@ -1,6 +1,6 @@
 from flask import Blueprint
-from flask_login import login_required
-from models import Clients, Task, Lengs, Template
+from flask_login import login_required, current_user
+from models import Clients, Task, Complite, Lengs, Template
 from flask import (
 	url_for, redirect,
 	render_template,
@@ -16,8 +16,9 @@ def tasks_routes(app, db):
 	@login_required
 	def list_tasks():
 		'''Страница заданий'''
+		lengs = Lengs.query.all()
 		response = Template(title='Задания', info='Задания', subinfo='Выберите задания')
-		return render_template('tasks.html', response=response) # tasks=tasks
+		return render_template('tasks.html', response=response, lengs=lengs) # tasks=tasks
 
 	@tasks_bp.post("/add")
 	@login_required
@@ -50,9 +51,20 @@ def tasks_routes(app, db):
 		'''Страница выполнения задания'''
 		name = session.get('username') or request.cookies.get('username')
 		if name:
+			lengs = Lengs.query.all()
 			task = Task.query.filter_by(id=n).first()
-			task.lang = json.loads(task.lang)
+			
+			task = { i: task.__dict__[i] for i in task.__dict__ if i != '_sa_instance_state' }
+			task["lang"] = json.loads(task["lang"])
+			
+			tmp = []
+			for i in task["lang"]:
+				for el in lengs:
+					if el.id == i:
+						tmp.append(el.name)
 
+			task["lang"] = tmp
+			
 			response = Template(title="Задание", info="", subinfo="")
 			return render_template('task.html', response=response, task=task)
 		return redirect(url_for('index'))
@@ -65,12 +77,33 @@ def tasks_routes(app, db):
 			data = request.get_json()
 			if data['status_task'] == 'success':
 				client = Clients.query.filter(Clients.name == data['performed_task']).first()
-				if data["id_task"] not in client.tasks_id:
+				lang = Lengs.query.filter(Lengs.name==data["lang"]).first()
+				task = Task.query.filter(Task.id==int(data["id_task"][0])).first()
+				if data["id_task"] not in client.tasks_id or Complite.query.filter(Complite.lang==lang).count() == 0:
 					client.level += .5
 					client.solved += 1
 					client.tasks_id = json.loads(client.tasks_id)
 					client.tasks_id.append(data['id_task'][0])
 					client.tasks_id = json.dumps(client.tasks_id)
+
+
+					complited = Complite.query.filter(
+						Complite.user == client.id,
+						Complite.lang == lang.id,
+						Complite.task == task.id
+					)
+					if complited.count() == 0:
+						code = Complite(
+							# id, # auto
+							code=data["code"],
+							# date, # auto
+							task=task.id,
+							user=client.id,
+							lang=lang.id
+						)
+						db.session.add(code)
+						db.session.flush()
+					
 					db.session.commit()
 
 					session['lvl'] = client.level
@@ -120,15 +153,17 @@ def tasks_routes(app, db):
 
 		if 'os' not in jn or 'eval' not in jn:
 			with open('compile/tmp.py', 'w') as f:
-				f.write( jn['code'] + "\n\n\n" + jn['run'] )
+				f.write( jn['code'] )
 
 		try:
-			os.system('py compile/tmp.py')
+			os.system('python compile/tmp.py')
 			with open('compile/out.txt', 'r') as f: data = f.read().strip().split('\n')
-
-			os.remove('compile/tmp.py')
+			
 			os.remove('compile/out.txt')
 		except Exception as e: data = {'err': str(e)}
+		finally:
+			os.remove('compile/tmp.py')
+
 		return json.dumps(data)
 	
 	return tasks_bp

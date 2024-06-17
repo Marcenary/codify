@@ -1,0 +1,49 @@
+<nav class="navbar-expand-lg navbar-dark" aria-label="Offcanvas navbar large" style="background-color: rgba(27, 14, 62, 0.75)">
+  <div class="container-fluid">
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasNavbar2" aria-labelledby="offcanvasNavbar2Label">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasNavbar2Label">Offcanvas</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body align-items-center">
+        <ul class="navbar-nav gap-3 justify-content-end align-items-center flex-grow-1 pe-3">
+          <li class="nav-item dropdown mr-1" data-bs-theme="dark">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="lni lni-angle-double-down"></i>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonDark">
+              <li><a class="dropdown-item" href="{{ url_for('about') }}">О Сервисе</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('help') }}#contacts">Контакты</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{{ url_for('help') }}">Помощь</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{ url_for('profile') }}">
+              <button type="button" class="btn btn-outline-light">
+                {{ current_user.name  }} <span class="badge text-bg-danger">lvl: {{ current_user.level  }}</span>
+              </button>
+            </a>
+          </li>
+          {% if response.title == "Задания" %}
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{ url_for('tasks.api', n='add_page') }}">
+              <button class="btn btn-outline-light">Создать</button>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+        <form class="d-flex py-1" role="search">
+          <input id="userSearch" required="(\d|\w|[А-Яа-яЁё]|^\s)*" class="form-control me-2" type="search" placeholder="Поиск" aria-label="Search">
+          <button id="search" class="btn btn-outline-light" type="submit">Search</button>
+          <script>
+            $("#search").click(e => {
+              document.location.replace(`${ location.origin }/profile/${ $('#userSearch').val() }`)
+              e.preventDefault()
+            })
+          </script>
+        </form>
+      </div>
+    </div>
+  </div>
+</nav>

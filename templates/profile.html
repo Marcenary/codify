@@ -1,59 +1,37 @@
-{% extends 'base.html' %}
-{% block title %}
-	<title>{{ response.title }}</title>
-{% endblock %}
-{% block content %}
-	<main class="hero is-info">
-		<div class="hero-head">
-			<div class="container">
-				<div class="tile is-ancestor is-justify-content-center">
-					<div class="tile is-3 is-vertical is-parent is-flex-direction-column is-align-items-center notification my-3 mx-3 border-width-1">
-						<div style="position: relative;">
-							<img style="max-width: 90%; border-radius: 60%; border-bottom-right-radius: 7%; border-top-left-radius: 7%;" src="{{ (response.user.email or current_user.email) | gravatar(size=350, rating='x') }}" alt="">
-							{% if current_user.is_active %}
-							<svg width="30" height="30" style="position: absolute; top: 250px; left: 250px;">
-								<circle cx="15" cy="15" r="15" fill="#009e6c" />
-							</svg>
-							{% endif %}
-						</div>
-						<p>{{ response.user.name or current_user.name }}</p>
-					</div>
-					<div class="tile is-3 is-vertical is-parent notification my-3 mx-3">
-						<div class="tile is-child notification is-info has-text-right">
-							<span>Имя: {{ current_user.name }}</span>
-						</div>
-						<div class="tile is-child notification is-link has-text-right">
-							<span>Почта: {{ current_user.email }}</span>
-						</div>
-						<div class="tile is-child notification is-primary has-text-right">
-							<span>Дата регистрации: {{ current_user.date.strftime('%Y-%b-%d') }}</span><!-- %H:%M:%S -->
-						</div>
-					</div>
-					<div class="tile is-3 is-vertical is-parent notification my-3 mx-3">
-						<div class="tile is-child notification is-warning is-bordered">
-							<span>Уровень: {{ current_user.level }}</span>
-						</div>
-						<div class="tile is-child notification is-danger">
-							<span>Решено задач: {{ current_user.solved }}</span>
-						</div>
-						<div class="tile is-child notification is-success">
-							<span>Решенные задачи: {{ 'Не одной не пройдено' if current_user.tasks_id == '[]' else current_user.tasks_id }}</span>
-						</div>
-					</div>
-					<div class="tile is-3 is-vertical is-parent notification is-info is-light my-3 mx-3 is-justify-content-center">
-						<label for="userSearch" class="title is-size-5 has-text-centered has-text-link ml-3">Введите имя</label>
-						<form class="is-flex is-flex-direction-column">
-							<input id="userSearch" class="input is-link mt-3" required="(\d|\w|[А-Яа-яЁё]|^\s)*" placeholder="Или номер страницы пользователя">
-							<button class="button is-link mt-3">Искать</button>
-							<script>
-								$(".button")[2].addEventListener("click", e => {
-									document.location.replace(`${ location.origin }/profile/${ $('input').val() }`)
-									e.preventDefault()
-								})
-							</script>
-						</form>
-					</div>
-				</div>
+{% extends 'auth.html' %}
+{% block main %}
+	<main class="d-flex flex-column gap-0 row-gap-5" style="height: 100vh; background-color: #1b1a5f;">
+		{% include 'header.html' %}
+		<div class="card text-bg-dark border-primary mx-auto my-5" style="width: 35vh;">
+			<img
+				class="card-img-top m-3"
+				style="max-width: 90%; border-radius: 60%; border-bottom-right-radius: 7%; border-top-left-radius: 7%;"
+				src="{{ (response.user.email or current_user.email) | gravatar(size=350, rating='x') }}" 
+				alt="">
+			<div class="card-body">
+				<h5 class="card-title text-center text-bg-success rounded-pill p-2">
+					{{ response.user.name or current_user.name }}
+				</h5>
+				<!-- <p class="card-text has-text-right"> -->
+					<!-- in future about user -->
+				<!-- </p> -->
+			</div>
+			<ul class="list-group list-group-flush list-group-item-dark">
+				<li class="list-group-item">
+					<span>Почта: {{ current_user.email }}</span>
+				</li>
+				<li class="list-group-item">
+					<span>Дата регистрации: {{ current_user.date.strftime('%Y-%b-%d') }}</span><!-- %H:%M:%S -->
+				</li>
+				<li class="list-group-item text-end">
+					<span>Уровень: {{ current_user.level }}</span>
+					<br><span>Решено задач: {{ current_user.solved }}</span>
+					<br><span>Решенные задачи: {{ 'Не одной не пройдено' if current_user.tasks_id == '[]' else current_user.tasks_id }}</span>
+				</li>
+			</ul>
+			<!-- <div class="card-body"><a href="#" class="card-link">Card link</a><a href="#" class="card-link">Another link</a></div> -->
+			<div class="card-footer text-bg-dark">
+				Последний раз был {{ current_user.last_seen }}
 			</div>
 		</div>
 	</main>

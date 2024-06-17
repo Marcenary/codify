@@ -1,12 +1,13 @@
 # users
-cert.pem
-key.pem
 other/
 migrations/
-*.cfg
+.vscode/
+readme_.txt
+cert.pem
+key.pem
 test.*
 test*.*
-.vscode/
+*.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

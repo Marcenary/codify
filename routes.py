@@ -1,4 +1,5 @@
 from route_api import api_routes
+
 from routes_users import users_routes
 from blueprint.tasks.routes_tasks import tasks_routes
 from blueprint.forum.routes_forum import forum_routes

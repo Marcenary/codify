@@ -4,7 +4,7 @@ from models import Lengs # Remove
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 
-from flask_login import login_user, logout_user, current_user, login_required
+from flask_login import login_user, logout_user, current_user, login_required, AnonymousUserMixin
 from flask import (
 	url_for, redirect,
 	render_template,
@@ -43,14 +43,38 @@ def users_routes(app, db, login, mail):
             return False
         return True
 
+
+    # NOT USE
+    def userOnline() -> None: # Пользователь в сети
+        if current_user != AnonymousUserMixin:
+            usr = Clients.query.filter(Clients.id==current_user.id)
+            usr.status = 1
+            db.session.add(usr)
+            db.session.flush()
+            db.session.commit()
+    
+    # NOT USE
+    def allUserOffline() -> None: # Все пользователи становятся оффлайн
+        usrs = Clients.query.all()
+        for usr in usrs:
+            if usr.status == 1:
+                usr.status = 0
+                db.session.add(usr)
+                db.session.flush()
+                db.session.commit()
+
+    # NOT USE
     @app.route("/highlight")
     def highlight():
         lengs = Lengs.query.all()
         response = Template(title='Highlight', info="Testing highlight", subinfo='highlight')
         return render_template("highlight.html", response=response, lengs=lengs)
 
+    # NOT USE
     @app.route("/test/<name>")
+    @login_required
     def test(name: str): return str(Clients.query.filter(Clients.name == name).count())
+
 
     @login.user_loader
     def load_user(uid): return Clients.query.get(uid)
@@ -63,24 +87,9 @@ def users_routes(app, db, login, mail):
     @app.errorhandler(404)
     def resource_not_found(e):
         '''Страница 404'''
-        return f"<html><head><title>Ошибка 404</title></head><body><h1 style='margin: auto; width: 75vw; display: flex; justify-content: center;'>{ str(e) }</h1></body></html>"
+        response = Template(title='Ошибка 404', info=str(e))
+        return render_template('other.html', response=response)
     
-    @app.route("/connect")
-    def connect():
-        try:
-            print(current_user.name) # current_user.status = 1 - online
-        except Exception:
-            pass
-        return "True"
-
-    @app.route("/disconnect")
-    def disconnect():
-        try:
-            print(current_user.name) # current_user.status = 0 - offline
-        except Exception:
-            pass
-        return "True"
-
     @app.route("/")
     def index():
         '''Главная страница'''
@@ -118,12 +127,16 @@ def users_routes(app, db, login, mail):
                     else:
                         flash('Password: неверный пароль!')
                 else:
-                    flash('Email Verification: не верефецированная почта!')
+                    flash('Email Verification: Не верифицированная почта!')
             else:
                 flash('Login: такой пользователь не существует!')
+            return redirect(url_for('index'))
+        else:
+            response = Template(title='Авторизация')
+            if 'username' in session or request.cookies.get('username'):
+                return redirect(url_for('profile'))
+            return render_template('login.html', response=response)
                 
-        return redirect(url_for('index'))
-
     @app.route("/sign", methods=["GET", "POST"])
     def signup():
         '''Маршрут регистрации'''
@@ -154,7 +167,7 @@ def users_routes(app, db, login, mail):
                         resp.set_cookie('username', login)
                         return resp
 
-                    flash('Такой пользователь уже существует!', 'info')
+                    flash('Email Verification: Откройте почту для верификации почты!', 'info')
                 except Exception as e:
                     db.session.rollback()
                     app.logger.info('Ошибка добавления в БД: %s' % e)
@@ -203,7 +216,9 @@ def users_routes(app, db, login, mail):
         # name = session.get('username') or request.cookies.get('username')
         # if name:
         response = Template(title="Профиль", info='Профиль')
-        return render_template('profile.html', response=response)
+        resp = make_response(render_template('profile.html', response=response))
+        resp.set_cookie('username', current_user.name)
+        return resp
 
     @app.route("/profile/<int:n>")
     @app.route("/profile/<n>")
@@ -217,7 +232,7 @@ def users_routes(app, db, login, mail):
             user = sql.first()
             response = Template(title=f'Профиль { user.name }', info='Профиль', subinfo=user.name, user=user)
             return render_template('profile_friend.html', response=response)
-        abort(404, description="This user not exists")
+        abort(404, description="Такого пользователя нет!")
 
     @app.route("/help")
     def help():

@@ -1,37 +1,61 @@
-{% extends 'base.html' %}
+{% extends 'auth.html' %}
 
-{% block title %}
-	<title>{{ response.title }}</title>
-{% endblock %}
-{% block content %}
-	<div class="hero is-info">
-		<div class="box mx-6 px-6">
-			<form action="http://127.0.0.1:5000/tasks/add" method="post" id="form">
-				<label class="label">
-					<div class="columns py-2">
-						<span class="column is-one-quarter is-size-5">Имя задания</span>
-						<input name="name" tabindex="1" id="name" type="text" class="input my-2" pattern="^([А-Яа-я0-9]|\w|\s){10,50}.$" placeholder="Маска кредитной карты..." required="true">
+{% block main %}
+<main class="d-flex flex-column gap-5" style="height: 100vh; background-color: #1b1a5f;">
+	{% include 'header.html' %}
+	<div class="container card p-2 text-center">
+		<form class="hstack gap-5 needs-validation" novalidate>
+			<div class="vstack col-6 mx-5">
+				<div class="col my-3" action="{{ url_for('tasks.add_task') }}/tasks/add" method="post" id="form">
+					<label for="name" class="form-label">Имя задания</label>
+					<input name="name" tabindex="1" id="name" type="text" pattern="^([А-Яа-я0-9]|\w|\s){10,50}.$" class="form-control" placeholder="Маска кредитной карты..." required>
+					<div class="valid-feedback">
+						Удачи!
 					</div>
-				</label>
-				<label class="label">
-					<div class="columns py-2">
-						<input name="in" tabindex="2" id="in" type="text" class="input my-2" pattern="^(\w|\s|,)+$" placeholder="Входящие1,Входящие2,..." required>
-						<span class="column is-one-quarter is-size-5">Входные данные</span>
+				</div>
+				<div class="col my-3">
+					<label for="in" class="form-label">Входные данные</label>
+					<input name="in" tabindex="2" id="in" type="text" class="form-control" pattern="^(\w|\s|,)+$" placeholder="Входящие1,Входящие2,..." required>
+					<div class="valid-feedback">
+						Удачи!
 					</div>
-				</label>
-				<label class="label">
-					<div class="columns py-2">
-						<input name="out" tabindex="3" id="out" type="text" class="input my-2" pattern="^(\w|\s|,|#|{|})+$" placeholder="верныйОтвет1,верныйОтвет2,..." required>
-						<span class="column is-one-quarter is-size-5">Выходные данные</span>
+				</div>
+				<div class="col my-3">
+					<label for="out" class="form-label">Выходные данные</label>
+					<input name="out" tabindex="3" id="out" type="text" class="form-control"  pattern="^(\w|\s|,|#|{|})+$" placeholder="верныйОтвет1,верныйОтвет2,..." required>
+					<div class="valid-feedback">
+						Удачи!
 					</div>
-				</label>
-				<label class="label py-2">
-					<span class="is-size-5">Описание задания</span>
-					<textarea  name="about" tabindex="4" id="about" class="textarea my-2" cols="10" rows="8" pattern="^([А-Яа-я0-9]|\s){25,1000}.$" placeholder="Обычно, когда вы что-то покупаете, вас спрашивают, верны ли номер вашей кредитной карты,..." required></textarea>
-				</label>
-				<button class="button is-info" type="submit">Добавить</button>
-			</form>
-		</div>
+				</div>
+				<div class="col my-3">
+					<label for="validationDefaultUsername" class="form-label">Пользователь</label>
+					<div class="input-group">
+						<span class="input-group-text" id="inputGroupPrepend2">@</span>
+						<input type="text" value="{{ current_user.name }}" class="form-control" id="validationDefaultUsername" aria-describedby="inputGroupPrepend2" disabled readonly required>
+					</div>
+				</div>
+				<div class="row row-cols-2 text-start">
+					{% for i in [ "Python", "JavaScript", "TypeScript", "Ruby", "C", "C++", "C#", "Java" ] %}
+						<div class="col form-check">
+							<input class="form-check-input" type="checkbox" name="{{ i }}" value="{{ i }}" id="{{ i }}" required>
+							<label class="form-check-label" for="{{ i }}">
+								{{ i }}
+							</label>
+							<div class="invalid-feedback">Вы должны выбрать хотя бы один.</div>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+			<div class="vstack col-10 gap-3 mx-5">
+				<div class="col my-3">
+					<label for="about" class="form-label">Описание задания</label>
+					<textarea name="about" tabindex="4" id="about" class="form-control" rows="14" pattern="^([А-Яа-я0-9]|\s){25,1000}.$" placeholder="Обычно, когда вы что-то покупаете, вас спрашивают, верны ли номер вашей кредитной карты,..."></textarea>
+				</div>
+				<div class="col my-3 align-self-end">
+					<button type="submit" class="btn btn-primary" type="submit">Создать</button>
+				</div>
+			</div>
+		</form>
 	</div>
 	<script>
 		window.addEventListener("load", e => {
@@ -51,5 +75,21 @@
 				console.log("Data save!")
 			}
 		}, 2000)
+
+		(() => {
+			'use strict'
+			const forms = document.querySelectorAll('.needs-validation')
+
+			Array.from(forms).forEach(form => {
+				form.addEventListener('submit', event => {
+					if (!form.checkValidity()) {
+						event.preventDefault()
+						event.stopPropagation()
+					}
+					form.classList.add('was-validated')
+				}, false)
+			})
+		})()
 	</script>
+</main>
 {% endblock %}

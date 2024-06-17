@@ -1,6 +1,10 @@
-{% extends 'base.html' %}
-{% block title %}
-	<title>{{ response.title }}</title>
-{% endblock %}
-{% block content %}
+{% extends 'auth.html' %}
+
+{% block main %}
+<div class="card m-auto" style="width: auto; height: auto;">
+    <img src="{{ url_for('static', filename='img/404.jpg') }}" class="card-img-top m-auto mt-4" alt="..." style="width: auto; height: 80vh;">
+    <div class="card-body">
+        <h1 class="card-text text-center">{{ response.info }}</h1>
+    </div>
+</div>
 {% endblock %}
