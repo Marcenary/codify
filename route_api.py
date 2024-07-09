@@ -40,9 +40,6 @@ class TasksResource(Resource):
             out = { i: out.__dict__[i] for i in out.__dict__ if i != '_sa_instance_state' }
             out["recipient"] = session.get('username')
         
-        elif types == "total":
-            return jsonify({ "total": tasks.count() })
-        
         else: abort(404)
 
         return jsonify(out)
@@ -52,6 +49,7 @@ class CompileResource(Resource):
         return { "data": f"Compiled code from { 'python' } lang." }
     
     def post(self):
+        valid = 'failed'
         parser.add_argument('lang')
         parser.add_argument('name')
         parser.add_argument('code')
@@ -68,6 +66,7 @@ class CompileResource(Resource):
             caller = class_(data["name"], data["code"], user=user)
             if caller.build():
                 app.logger.info("Command output: %s", True)
+                valid = 'success'
             out = caller.result
         except Exception as e:
             out = str(e)
@@ -76,6 +75,7 @@ class CompileResource(Resource):
             "data": f"Compiled code from { data['lang'] } lang.",
             "lang": data["lang"],
             "name": data["name"],
+            "status": valid,
             "result": out
         }
 

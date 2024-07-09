@@ -3,7 +3,7 @@ import subprocess as subp
 
 from os import remove
 from os.path import exists
-
+import time
 from .Interface import Compile
 
 class Python(Compile):
@@ -59,7 +59,7 @@ class Python(Compile):
         search = "{}{}.{}" # <task><name>.<ext> - функция тестирования, короткое имя задания, имя выполняющего задания, расширение файла
         try:
             name   = search.format(self.name, self.user, self.ext)
-            result = search.format(self.name, self.user, ".py.txt")
+            result = search.format(self.name, self.user, "py.txt")
             
             if exists(name): remove(name)
 
@@ -130,7 +130,7 @@ class JavaScript(Compile):
         search = "{}{}.{}" # <task><name>.<ext> - функция тестирования, короткое имя задания, имя выполняющего задания, расширение файла
         try:
             name   = search.format(self.name, self.user, self.ext)
-            result = search.format(self.name, self.user, ".js.txt")
+            result = search.format(self.name, self.user, "js.txt")
             
             if exists(name): remove(name)
 
@@ -156,7 +156,7 @@ class TypeScript(JavaScript):
         super(TypeScript, self).__init__(name, code, user)
         self.ext     = "ts"
         self.program = "tsc"
-        self.testing_code = "const fs = require(\"fs\")\nfunction test(a: any=null, b: any=null, err: any=null): any {\n\tfs.appendFileSync('%s', (err != null ? err : `${ a == b }\\n`))\n}"
+        self.testing_code = "const fs = require(\"fs\")\nfunction test(a: any=null, b: any=null, err: any=null): void {\n\tfs.appendFileSync('%s', (err != null ? err : `${ a == b }\\n`))\n}"
     
     def _tsc(self) -> tuple:
         search = "{}{}.{}" # <task><name>.<ext> - функция тестирования, короткое имя задания, имя выполняющего задания, расширение файла
@@ -169,7 +169,7 @@ class TypeScript(JavaScript):
             jname = f"compile/languages/typescript/{ jname }" # переместить над проверкой exists!
             with open(name, "w") as f:
                 code = self.testing_code%result + '\n\n' + self._code
-                f.write(code.replace("const test = require(\"./test.ts\")", ''))
+                f.write(code.replace("import test from \"test.js\"", ''))
 
             process = subp.run([self.program, name], capture_output=True)
             error = process.stderr
@@ -243,7 +243,7 @@ class Ruby(Compile):
         super(Ruby, self).__init__(name, code, user)
         self.ext     = "rb"
         self.program = "ruby"
-        self.testing_code = "def test(a=nil, b=nil, err=nil)\n\tFile.open(\"out.txt\", \"w\") do |f|\n\t\tf.write(err != nil ? err : (a == b).to_s())\nend\nend"
+        self.testing_code = "def test(a=nil, b=nil, err=nil)\n\tFile.open(\"%s\", \"a\") do |f|\n\t\tf.write(err != nil ? err : (a == b).to_s())\n\tend\nend"
     
     def build(self) -> bool:
         valid = self._valid()
@@ -268,11 +268,6 @@ class Ruby(Compile):
                 'pattern': r'require\(.?(os|sys|fs|tkinter).?\)',
                 'exception': "Такая библиотека не существует! (1)"
             },
-            'import2_exception': {
-                # Можно обойти проверку написав пробел + импорт(проверить!!!)
-                'pattern': r'(\b|\s)import.+from .?(os|sys|time|tkinter).?',
-                'exception': "Такой библиотеки или функции не существует! (2)"
-            },
             'function_exception': {
                 'pattern': r'(eval|puts|gets|File|exec)',
                 'exception': "Такой функции не существует! (3)"
@@ -288,7 +283,7 @@ class Ruby(Compile):
         search = "{}{}.{}" # <task><name>.<ext> - функция тестирования, короткое имя задания, имя выполняющего задания, расширение файла
         try:
             name   = search.format(self.name, self.user, self.ext)
-            result = search.format(self.name, self.user, ".rb.txt")
+            result = search.format(self.name, self.user, "rb.txt")
             
             if exists(name): remove(name)
 
@@ -296,8 +291,9 @@ class Ruby(Compile):
             result = f"compile/languages/ruby/{ result }"
             with open(name, "w") as f:
                 code = self.testing_code%result + '\n\n' + self._code
-                f.write(code.replace("require(\"test\")", ''))
-
+                code = code.replace("require_relative 'test'\ninclude Test", '')
+                f.write(code.replace("Test.", ''))
+            time.sleep(10)
             process = subp.run([self.program, name], capture_output=True)
             error = process.stderr
             remove(name)
@@ -314,7 +310,7 @@ class PHP(Compile):
         super(PHP, self).__init__(name, code, user)
         self.ext     = "php"
         self.program = "php"
-        self.testing_code = ""
+        self.testing_code = "function test($a=null, $b=null, $err=null) {\n\tfile_put_contents('%s', $err == null ? $a == $b : $err, FILE_APPEND);\n}"
     
     def __str__(self):
         return f"<Class'PHP name={ self.name }>"
@@ -358,11 +354,10 @@ class PHP(Compile):
         return True
     
     def _compile(self) -> tuple:
-        '''Проверить дебагером созданные файлы, без debug=1!!!'''
-        search = "{}{}.{}" # <task><name>.<ext> - функция тестирования, короткое имя задания, имя выполняющего задания, расширение файла
+        search = "{}{}.{}"
         try:
             name   = search.format(self.name, self.user, self.ext)
-            result = search.format(self.name, self.user, ".php.txt")
+            result = search.format(self.name, self.user, "php.txt")
             
             if exists(name): remove(name)
 
@@ -370,7 +365,7 @@ class PHP(Compile):
             result = f"compile/languages/php/{ result }"
             with open(name, "w") as f:
                 code = self.testing_code.format(result) + '\n\n' + self._code
-                f.write(code) # f.write(code.replace("from test import test", ''))
+                f.write(code)
 
             process = subp.run([self.program, name], capture_output=True)
             error = process.stderr

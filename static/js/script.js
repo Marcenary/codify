@@ -1,15 +1,11 @@
 import { Compile } from '/static/js/compile.js'
 
-String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
-    return target.replace(new RegExp(search, 'g'), replacement);
-};
-
 const
     editor   = ace.edit("editor"),
     readonly = ace.edit("run"),
     sel      = $('#select'),
-    compile  = new Compile()
+    compile  = new Compile(),
+    num = document.location.href.split('/').slice(-1)
 
 function editorSetup(lang) {
     let theme = "ace/theme/one_dark";
@@ -24,6 +20,9 @@ function editorSetup(lang) {
     
     readonly.setTheme(theme);
     readonly.setReadOnly(true);
+
+    editor.setValue("")
+    readonly.setValue("")
     
     $('#editor').css("fontSize", '16px');
     $('#run').css("fontSize", '16px');
@@ -61,38 +60,43 @@ window.onload = e => {
     })
     .then(data => data.json())
     .then(json => sessionStorage.setItem("task", JSON.stringify(json)))
-    console.log("Load data!")
+    // console.log("Load data!")
     editorSetup()
-    // если задание уже было пройдено не засчитывать ни опыт не кол-во вып.
-    // записать в переменную и сравнивать
-    // просто перенаправлять на главную без записи в бд
-    if (localStorage.getItem("lang") != null)
-        editor.setValue(localStorage.getItem("code"))
+
+    // if (localStorage.getItem("lang") != null)
+    //     editor.setValue(localStorage.getItem("code"))
 }
 
 setInterval(e => {
 	if ( editor.getValue() != localStorage.getItem("code") ) {
-		console.log("Data save!")
+		console.log(`Data save! - ${ sel.text() }`)
 		localStorage.setItem("code", editor.getValue())
 		localStorage.setItem("lang", sel.text())
 	}
-}, 15000)
+}, 10000)
 
 // for all
 function pyClick() {
+    let link;
     const data = {
         lang: sel.text(),
-        name: 0,
+        name: `Task${ num }`,
         code: `${ editor.getValue() }\n\n${ readonly.getValue() }`,
     }
     
-    // if (data.lang == "Python")
-    // if (data.lang == "JavaScript")
-    // if (data.lang == "TypeScript")
-    // if (data.lang == "Ruby")
-    // if (data.lang == "PHP")
-    
-    fetch(`${ document.location.origin }/tasks/compile`, {
+    if (data.lang == "Python")
+        link = `/tasks/compile`
+    if (data.lang == "TypeScript")
+        link = `/tasks/compile/type`
+    if (data.lang == "Ruby")
+        link = `/tasks/compile/ruby`
+    if (data.lang == "PHP") {
+        link = `/tasks/compile/php`
+        let tmp = readonly.getValue().replace("<?php\n", "")
+        data.code = `${ editor.getValue() }\n\n${ tmp }`
+    }
+
+    fetch(`${ document.location.origin }${link}`, {
         method: 'POST', mode: 'cors',
         cache: 'no-cache', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
@@ -101,15 +105,22 @@ function pyClick() {
     })
     .then(data => data.json())
     .then(json => {
+        console.log(json);
         $('#log').text("")
-        json[0].split(/\b/)
-        let res = json.join(''), out = ''
-        console.log(res);
-        
-        json = json.map(i => (i != "True" && i != "False") ? i : (i == "True" ? true : false))
-        json = json.every(i => i)
 
-        res = res.replace(/True/g, "<span class='text-success'>Верное решение<span><br>")
+        if (json.status == "failed") {
+            $('#log').html(json.result.replace(/\\(n|'|")/g, '\n')
+            .split('\n')
+            .map(i => i + '<br>'))
+            return
+        }
+        json = json.result.map(i => i.toUpperCase())
+        let res = json.join()
+        
+        json = json.map(i => ( "TRUE" != i && "FALSE" != i) ? i : ("TRUE" == i ? true : false))
+        json = json.every(i => i)
+        
+        res = res.replace(/TRUE,?/g, "<span class='text-success'>Верное решение<span><br>")
         if (json) {
             $("#test").removeClass("btn-primary")
             $("#test").addClass("btn-outline-primary")
@@ -117,7 +128,7 @@ function pyClick() {
             $("#submit").addClass("btn-success")
             document.querySelector('#submit').onclick = sendSuccess
         }
-        else res = res.replace(/False/g, "<span class='text-danger'>Не верное значение</span><br>")
+        else res = res.replace(/FALSE,?/g, "<span class='text-danger'>Не верное значение</span><br>")
         $('#log').html(res)
 
     }).catch(err => { console.log(err); })
@@ -127,14 +138,13 @@ function jsClick() {
     const data = {}
     data["code"] = editor.getValue()
     data["run"]  = readonly.getValue()
-
-    console.log(data);
-
+    
     let res = compile.compile(data)
-
+    
     $('#log').text("")
     $('#log').text(res)
-
+    
+    console.log(res);
     res = res.every(i => i)
     if (res) {
         alert("Task fullfilled")
@@ -153,19 +163,31 @@ $(".lang").click(e => {
             TypeScript: 'typescript',
             Ruby: 'ruby',
             PHP: 'php'
-        }[e.target.value]
+        }[e.target.value],
+        cache_lang = localStorage.getItem("lang")
 
     let all_code = compile.task(task.practic, task.otvet, value)
-    editor.setValue(all_code[0])
+
+    console.log(cache_lang != null)
+    if (cache_lang != null && cache_lang.toLowerCase() == value)
+        editor.setValue(localStorage.getItem("code"))
+    else
+        editor.setValue(all_code[0])
     readonly.setValue(all_code[1])
 
     editor.session.setMode(`ace/mode/${value}`)
-    readonly.session.setMode(`ace/mode/${value}`)
-	
+    readonly.session.setMode(`ace/mode/${value}`)    
+    
+    if (value == 'python')
+        $('#test').click(pyClick)
+    if (value == 'ruby')
+        $('#test').click(pyClick)
+    if (value == 'php')
+        $('#test').click(pyClick)
     if (value == 'javascript')
         $('#test').click(jsClick)
-	else if (value == 'python')
+    if (value == 'typescript')
         $('#test').click(pyClick)
-    else if (value == 'none')
+    if (value == 'none')
         $('#test').click(() => console.log("Choice lang"))
 })
