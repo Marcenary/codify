@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тесты — Платформа ИБ</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/quests.css') }}">
+</head>
+<body>
+
+<div class="container py-5" style="max-width: 1000px;">
+
+  <div class="text-center mb-5">
+    <div class="platform-badge d-inline-flex align-items-center gap-2 mb-3 px-3 py-2 rounded-pill">
+      <i class="bi bi-shield-check text-primary"></i>
+      <span class="text-muted small fw-semibold">Платформа обучения ИБ</span>
+    </div>
+    <h1 class="fw-bold mb-2">Тестирование знаний</h1>
+    <p class="text-muted fs-5 mb-0">
+      Выберите тему — пройдите все вопросы по разработке<br>онлайн-платформы для навыков программирования в ИБ
+    </p>
+  </div>
+
+  <div class="row g-4">
+    {% for topic in topics %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <a href="/quests/quiz/{{ topic.id }}" class="text-decoration-none">
+        <div class="topic-card card h-100 border-0">
+          <div class="card-body p-4 d-flex flex-column gap-3">
+
+            <!-- Иконка + бейдж кол-ва -->
+            <div class="d-flex align-items-start justify-content-between">
+              <div class="topic-icon d-flex align-items-center justify-content-center rounded-3"
+                   style="background:{{ topic.color }}18; color:{{ topic.color }}">
+                <i class="bi {{ topic.icon }} fs-2"></i>
+              </div>
+              <span class="badge rounded-pill small"
+                    style="background:{{ topic.color }}18; color:{{ topic.color }}">
+                {{ topic.count }} вопр.
+              </span>
+            </div>
+
+            <!-- Название -->
+            <h6 class="card-title fw-bold mb-0 lh-sm">{{ topic.name }}</h6>
+
+            <!-- Тип вопросов -->
+            <div class="d-flex gap-1 flex-wrap">
+              <span class="badge bg-light text-muted border small">
+                <i class="bi bi-check2-circle me-1"></i>Одиночный
+              </span>
+              <span class="badge bg-light text-muted border small">
+                <i class="bi bi-check2-all me-1"></i>Множественный
+              </span>
+              <span class="badge bg-light text-muted border small">
+                <i class="bi bi-input-cursor me-1"></i>Текст
+              </span>
+            </div>
+
+            <!-- Кнопка -->
+            <div class="topic-btn btn btn-sm mt-auto text-white fw-semibold rounded-2"
+                 style="background:{{ topic.color }}">
+              Начать тест <i class="bi bi-arrow-right ms-1"></i>
+            </div>
+
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

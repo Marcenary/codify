@@ -22,9 +22,21 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
+                        <a href="{{ url_for('quests.list_quests') }}" class="sidebar-link text-decoration-none">
+                            <i class="lni lni-agenda"></i>
+                            <span>Вопросы</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
                         <a href="{{ url_for('tasks.list_tasks') }}" class="sidebar-link text-decoration-none">
                             <i class="lni lni-agenda"></i>
                             <span>Задания</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('tasks.list_riddles') }}" class="sidebar-link text-decoration-none">
+                            <i class="lni lni-agenda"></i>
+                            <span>Загадки</span>
                         </a>
                     </li>
                     <li class="sidebar-item">

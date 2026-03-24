@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ topic_name }} — Тест</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/quests.css') }}">
+</head>
+<body>
+
+<!-- Данные для JS (без правильных ответов) -->
+<script>
+  const TOPIC_ID    = "{{ topic_id }}";
+  const TOPIC_COLOR = "{{ topic_color }}";
+  const QUESTIONS   = {{ questions | tojson }};
+</script>
+
+<div class="container py-4" style="max-width: 780px;">
+
+  <!-- Навигация + заголовок -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="/quests" class="btn btn-sm btn-outline-secondary px-3">
+      <i class="bi bi-arrow-left me-1"></i>Назад
+    </a>
+    <div>
+      <div class="text-muted small">Тест</div>
+      <div class="fw-bold" style="color:{{ topic_color }}">{{ topic_name }}</div>
+    </div>
+    <div class="ms-auto text-end">
+      <div class="text-muted small">Счёт</div>
+      <div class="fw-bold fs-5" id="score-display">0 / {{ total }}</div>
+    </div>
+  </div>
+
+  <!-- Прогресс-бар -->
+  <div class="d-flex justify-content-between text-muted small mb-1">
+    <span>Вопрос <span id="q-num">1</span> из {{ total }}</span>
+    <span id="q-type-label" class="badge rounded-pill bg-light text-muted border"></span>
+  </div>
+  <div class="progress mb-4" style="height:5px; border-radius:3px;">
+    <div id="progress-bar" class="progress-bar" role="progressbar"
+         style="width:{{ (1/total*100)|round(1) }}%; background:{{ topic_color }}; transition:width .4s ease;">
+    </div>
+  </div>
+
+  <!-- Блок с вопросами -->
+  <div id="quiz-container">
+    {% for q in questions %}
+    <div class="q-block" id="q-{{ q.index }}" style="display:none;">
+
+      <!-- Текст вопроса -->
+      <div class="question-card card border-0 shadow-sm mb-3">
+        <div class="card-body p-4">
+          <p class="fw-semibold fs-5 mb-0 lh-base">
+            <span class="q-num-badge me-2" style="color:{{ topic_color }}">
+              {{ loop.index }}.
+            </span>{{ q.text }}
+          </p>
+        </div>
+      </div>
+
+      <!-- ── Одиночный выбор ── -->
+      {% if q.type == 'single' %}
+      <div class="d-grid gap-2 mb-3" id="opts-{{ q.index }}">
+        {% for key, text in q.options.items() %}
+        <button class="option-btn btn btn-outline-secondary text-start d-flex align-items-center gap-3"
+                data-key="{{ key }}"
+                onclick="answerSingle({{ q.index }}, '{{ key }}', this)">
+          <span class="opt-letter rounded-2 fw-bold" style="color:{{ topic_color }}">{{ key }}</span>
+          <span>{{ text }}</span>
+        </button>
+        {% endfor %}
+      </div>
+
+      <!-- ── Множественный выбор ── -->
+      {% elif q.type == 'multi' %}
+      <div class="multi-hint text-muted small mb-2">
+        <i class="bi bi-info-circle me-1"></i>Выберите все верные варианты
+      </div>
+      <div class="d-grid gap-2 mb-3" id="opts-{{ q.index }}">
+        {% for key, text in q.options.items() %}
+        <button class="option-btn btn btn-outline-secondary text-start d-flex align-items-center gap-3"
+                data-key="{{ key }}" data-selected="false"
+                onclick="toggleMulti({{ q.index }}, '{{ key }}', this)">
+          <span class="opt-letter rounded-2 fw-bold" style="color:{{ topic_color }}">{{ key }}</span>
+          <span>{{ text }}</span>
+        </button>
+        {% endfor %}
+      </div>
+      <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-sm fw-semibold text-white px-4"
+                style="background:{{ topic_color }}"
+                id="submit-multi-{{ q.index }}"
+                onclick="submitMulti({{ q.index }})">
+          Проверить <i class="bi bi-check-lg ms-1"></i>
+        </button>
+      </div>
+
+      <!-- ── Текстовый ввод ── -->
+      {% elif q.type == 'text' %}
+      <div class="mb-3" id="opts-{{ q.index }}">
+        <div class="text-muted small mb-2">
+          <i class="bi bi-input-cursor me-1"></i>Введите ответ
+        </div>
+        <input type="text" class="form-control form-control-lg"
+               id="text-input-{{ q.index }}"
+               placeholder="Ваш ответ..."
+               onkeydown="if(event.key==='Enter') submitText({{ q.index }})">
+        <div class="d-flex justify-content-end mt-2">
+          <button class="btn btn-sm fw-semibold text-white px-4"
+                  style="background:{{ topic_color }}"
+                  onclick="submitText({{ q.index }})">
+            Проверить <i class="bi bi-check-lg ms-1"></i>
+          </button>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Фидбек (скрыт до ответа) -->
+      <div id="fb-{{ q.index }}" class="feedback-box" style="display:none;"></div>
+
+      <!-- Кнопка Далее -->
+      <div class="d-flex justify-content-end mt-3">
+        <button class="btn fw-semibold text-white px-4"
+                id="next-{{ q.index }}"
+                style="display:none; background:{{ topic_color }}"
+                onclick="nextQuestion({{ q.index }})">
+          {% if loop.last %}
+            Завершить <i class="bi bi-flag-fill ms-1"></i>
+          {% else %}
+            Следующий <i class="bi bi-arrow-right ms-1"></i>
+          {% endif %}
+        </button>
+      </div>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ══ Экран результата ══ -->
+  <div id="result-screen" style="display:none;">
+    <div class="result-hero card border-0 shadow-sm text-center p-5 mb-4">
+
+      <!-- Кольцо -->
+      <div class="result-ring mx-auto mb-4">
+        <svg viewBox="0 0 120 120" width="150" height="150">
+          <circle cx="60" cy="60" r="52" fill="none"
+                  stroke="#e9ecef" stroke-width="10"/>
+          <circle id="ring-arc" cx="60" cy="60" r="52" fill="none"
+                  stroke="{{ topic_color }}" stroke-width="10"
+                  stroke-linecap="round"
+                  stroke-dasharray="327" stroke-dashoffset="327"
+                  transform="rotate(-90 60 60)"
+                  style="transition:stroke-dashoffset .9s ease"/>
+        </svg>
+        <div class="ring-label">
+          <div class="fw-black fs-2" id="r-score">0/0</div>
+          <div class="text-muted small" id="r-pct">0%</div>
+        </div>
+      </div>
+
+      <h2 class="fw-bold mb-1" id="r-title"></h2>
+      <p class="text-muted mb-0" id="r-sub"></p>
+    </div>
+
+    <!-- Разбор ошибок -->
+    <div id="r-breakdown" class="mb-4"></div>
+
+    <div class="d-flex gap-2 justify-content-center flex-wrap">
+      <a href="/quests/quiz/{{ topic_id }}" class="btn btn-primary fw-semibold px-4">
+        <i class="bi bi-arrow-clockwise me-1"></i>Пройти снова
+      </a>
+      <a href="/quests" class="btn btn-outline-secondary fw-semibold px-4">
+        <i class="bi bi-grid me-1"></i>Все темы
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+</body>
+</html>

@@ -145,6 +145,13 @@ def tasks_routes(app, db):
 			return render_template('add_task.html', response=response)
 		
 		return "Uncorrect request!"
+	
+	@tasks_bp.get("/list_riddles")
+	def list_riddles():
+		'''Страница загадок'''
+		lengs = Lengs.query.all()
+		response = Template(title='Загадоки', info='Загадоки', subinfo='Выберите загадоку')
+		return render_template('tasks.html', response=response, lengs=lengs) # quest=quest
 
 	@tasks_bp.post("/compile")
 	def compile_task():
@@ -154,25 +161,26 @@ def tasks_routes(app, db):
 			jn = request.get_json()
 
 			if 'os' not in jn['code'] or 'eval' not in jn['code']:
-				with open(f'compile/languages/python/{ jn["name"] }.py', 'w') as f:
+				with open(f'compile/{ jn["name"] }.py', 'w') as f:
 					f.write( jn['code'] )
 			# else: raise ExceptionServer("Такой модуль не поддерживается")
 
-			out = subp.run([ "python", f"compile/languages/python/{ jn['name'] }.py" ], capture_output=True)
+			out = subp.run([ "python", f"compile/{ jn['name'] }.py" ], capture_output=True)
 			error = out.stderr
 			if error != b'':
 				result = error.decode()
 				valid = "failed"
 			else:
-				with open('compile/languages/python/out.txt', 'r') as f: result = f.read().strip().split('\n')
-				os.remove('compile/languages/python/out.txt')
+				with open('compile/out.txt', 'r') as f: result = f.read().strip().split('\n')
+				os.remove('compile/out.txt')
 				valid = "success"
 		except Exception as e:
 			print(e)
 			result = 'Server error!'
 			valid = "failed"
 		finally:
-			os.remove(f'compile/languages/python/{ jn["name"] }.py')
+			print(os.listdir())
+			os.remove(f'compile/{ jn["name"] }.py')
 
 		return jsonify({
             "data": f"Compiled code from { jn['lang'] } lang.",
@@ -190,24 +198,24 @@ def tasks_routes(app, db):
 			jn = request.get_json()
 
 			if 'os' not in jn['code'] or 'eval' not in jn['code']:
-				with open(f'compile/languages/ruby/{ jn["name"] }.rb', 'w') as f:
+				with open(f'compile/{ jn["name"] }.rb', 'w') as f:
 					f.write( jn['code'] )
 
-			out = subp.run([ "ruby", f"compile/languages/ruby/{ jn['name'] }.rb" ], capture_output=True)
+			out = subp.run([ "ruby", f"compile/{ jn['name'] }.rb" ], capture_output=True)
 			error = out.stderr
 			
 			if error != b'':
 				result = error.decode()
 				valid = "failed"
 			else:
-				with open('compile/languages/ruby/out.txt', 'r') as f: result = f.read().strip().split('\n')
-				os.remove('compile/languages/ruby/out.txt')
+				with open('compile/out.txt', 'r') as f: result = f.read().strip().split('\n')
+				os.remove('compile/out.txt')
 				valid = "success"
 		except Exception as e:
 			result = 'Server error!'
 			valid = "failed"
 		finally:
-			os.remove(f'compile/languages/ruby/{ jn["name"] }.rb')
+			os.remove(f'compile/{ jn["name"] }.rb')
 
 		return jsonify({
             "data": f"Compiled code from { jn['lang'] } lang.",
@@ -225,24 +233,24 @@ def tasks_routes(app, db):
 			jn = request.get_json()
 
 			if 'os' not in jn['code'] or 'eval' not in jn['code']:
-				with open(f'compile/languages/javascript/{ jn["name"] }.js', 'w') as f:
+				with open(f'compile/{ jn["name"] }.js', 'w') as f:
 					f.write( jn['code'] )
 
-			out = subp.run([ "ruby", f"compile/languages/javascript/{ jn['name'] }.js" ], capture_output=True)
+			out = subp.run([ "ruby", f"compile/{ jn['name'] }.js" ], capture_output=True) # node vmesto ruby
 			error = out.stderr
 			
 			if error != b'':
 				result = error.decode()
 				valid = "failed"
 			else:
-				with open('compile/languages/javascript/out.txt', 'r') as f: result = f.read().strip().split('\n')
-				os.remove('compile/languages/javascript/out.txt')
+				with open('compile/out.txt', 'r') as f: result = f.read().strip().split('\n')
+				os.remove('compile/out.txt')
 				valid = "success"
 		except Exception as e:
 			result = 'Server error!'
 			valid = "failed"
 		finally:
-			os.remove(f'compile/languages/javascript/{ jn["name"] }.js')
+			os.remove(f'compile/{ jn["name"] }.js')
 
 		return jsonify({
             "data": f"Compiled code from { jn['lang'] } lang.",
@@ -260,24 +268,24 @@ def tasks_routes(app, db):
 			jn = request.get_json()
 
 			if 'os' not in jn['code'] or 'eval' not in jn['code']:
-				with open(f'compile/languages/php/{ jn["name"] }.php', 'w') as f:
-					f.write( jn['code'].replace("include(\"./test.php\");", "function test($a=null, $b=null, $err=null) {\n\tfile_put_contents('compile/languages/php/out.txt', $err != null ? $err : json_encode($a == $b) . \"\n\", FILE_APPEND);\n}\n\n\n") )
+				with open(f'compile/{ jn["name"] }.php', 'w') as f:
+					f.write( jn['code'].replace("include(\"./test.php\");", "function test($a=null, $b=null, $err=null) {\n\tfile_put_contents('compile/out.txt', $err != null ? $err : json_encode($a == $b) . \"\n\", FILE_APPEND);\n}\n\n\n") )
 
-			out = subp.run([ "php", f"compile/languages/php/{ jn['name'] }.php" ], capture_output=True)
+			out = subp.run([ "php", f"compile/{ jn['name'] }.php" ], capture_output=True)
 			error = out.stderr
 			
 			if error != b'':
 				result = error.decode()
 				valid = "failed"
 			else:
-				with open('compile/languages/php/out.txt', 'r') as f: result = f.read().strip().split('\n')
-				os.remove('compile/languages/php/out.txt')
+				with open('compile/out.txt', 'r') as f: result = f.read().strip().split('\n')
+				os.remove('compile/out.txt')
 				valid = "success"
 		except Exception as e:
 			result = 'Server error!'
 			valid = "failed"
 		finally:
-			os.remove(f'compile/languages/php/{ jn["name"] }.php')
+			os.remove(f'compile/{ jn["name"] }.php')
 
 		return jsonify({
             "data": f"Compiled code from { jn['lang'] } lang.",
@@ -295,32 +303,32 @@ def tasks_routes(app, db):
 			jn = request.get_json()
 
 			if 'os' not in jn['code'] or 'eval' not in jn['code']:
-				with open(f'compile/languages/typescript/{ jn["name"] }.ts', 'w') as f:
+				with open(f'compile/{ jn["name"] }.ts', 'w') as f:
 					f.write( jn['code'] )
 
-			out = subp.run([ "tsc", f"compile/languages/typescript/{ jn['name'] }.ts" ], capture_output=True)
+			out = subp.run([ "tsc", f"compile/{ jn['name'] }.ts" ], capture_output=True)
 			error = out.stdout
 			
 			if error != b'':
 				result = error.decode()
 				valid = "failed"
 			else:
-				out = subp.run([ "node", f"compile/languages/typescript/{ jn['name'] }.js" ], capture_output=True)
+				out = subp.run([ "node", f"compile/{ jn['name'] }.js" ], capture_output=True)
 				error = out.stderr
 			
 				if error != b'':
 					result = error.decode()
 					valid = "failed"
 				else:
-					with open('compile/languages/typescript/out.txt', 'r') as f: result = f.read().strip().split('\n')
-					os.remove('compile/languages/typescript/out.txt')
+					with open('compile/out.txt', 'r') as f: result = f.read().strip().split('\n')
+					os.remove('compile/out.txt')
 					valid = "success"
 		except Exception as e:
 			result = 'Server error!'
 			valid = "failed"
 		finally:
-			os.remove(f'compile/languages/typescript/{ jn["name"] }.ts')
-			os.remove(f'compile/languages/typescript/{ jn["name"] }.js')
+			os.remove(f'compile/{ jn["name"] }.ts')
+			os.remove(f'compile/{ jn["name"] }.js')
 
 		return jsonify({
             "data": f"Compiled code from { jn['lang'] } lang.",
